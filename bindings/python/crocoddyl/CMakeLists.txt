@@ -21,7 +21,9 @@ TARGET_COMPILE_OPTIONS(${PROJECT_NAME}_pywrap PRIVATE "-Wno-conversion")
 # We are also exposing deprecated declarations until they are removed. Ignore the errors for the wrapper:
 TARGET_COMPILE_OPTIONS(${PROJECT_NAME}_pywrap PRIVATE "-Wno-deprecated-declarations")
 
-IF(UNIX AND NOT APPLE)
+IF(APPLE)
+  SET_TARGET_PROPERTIES(${PROJECT_NAME}_pywrap PROPERTIES INSTALL_RPATH "@loader_path/../../..")
+ELSEIF(UNIX)
   SET_TARGET_PROPERTIES(${PROJECT_NAME}_pywrap PROPERTIES INSTALL_RPATH "\$ORIGIN/../../..")
 ENDIF()
 
