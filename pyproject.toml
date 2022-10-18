@@ -18,3 +18,4 @@ requires = [
     "scipy",
     ]
 build-backend = "cmeel.build"
+build-number = 1
