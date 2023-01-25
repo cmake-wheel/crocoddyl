@@ -9,6 +9,9 @@ dependencies = ["example-robot-data"]
 [project.urls]
 homepage = "https://github.com/loco-3d/crocoddyl"
 
+[tool.cmeel]
+build-number = 1
+
 [build-system]
 build-backend = "cmeel.build"
 requires = [
