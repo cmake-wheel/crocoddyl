@@ -1,9 +1,13 @@
+[build-system]
+build-backend = "cmeel.build"
+requires = ["cmeel[build]", "example-robot-data[build]", "scipy"]
+
 [project]
+dependencies = ["example-robot-data"]
+description = "A fast and flexible implementation of Rigid Body Dynamics algorithms and their analytical derivatives"
+license = "BSD-3-Clause"
 name = "crocoddyl"
 version = "1.9.0.2"
-description = "A fast and flexible implementation of Rigid Body Dynamics algorithms and their analytical derivatives"
-license= "BSD-3-Clause"
-dependencies = ["example-robot-data"]
 
 [project.urls]
 homepage = "https://github.com/loco-3d/crocoddyl"
@@ -11,6 +15,5 @@ homepage = "https://github.com/loco-3d/crocoddyl"
 [tool.cmeel]
 build-number = 1
 
-[build-system]
-build-backend = "cmeel.build"
-requires = ["cmeel[build]", "example-robot-data[build]", "scipy"]
+[tool.tomlsort]
+all = true
