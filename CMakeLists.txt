@@ -401,18 +401,8 @@ if(UNIX)
   target_include_directories(${PROJECT_NAME}
                              PUBLIC $<INSTALL_INTERFACE:include>)
   target_link_libraries(${PROJECT_NAME} pinocchio::pinocchio)
-  modernize_target_link_libraries(
-    ${PROJECT_NAME}
-    SCOPE
-    PUBLIC
-    TARGETS
-    Boost::filesystem
-    Boost::system
-    Boost::serialization
-    LIBRARIES
-    ${Boost_FILESYSTEM_LIBRARY}
-    ${Boost_SYSTEM_LIBRARY}
-    ${Boost_SERIALIZATION_LIBRARY})
+  target_link_libraries(${PROJECT_NAME} Boost::filesystem Boost::system
+                        Boost::serialization)
 
   if(BUILD_WITH_MULTITHREADS)
     target_link_libraries(${PROJECT_NAME} OpenMP::OpenMP_CXX)
