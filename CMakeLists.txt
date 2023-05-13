@@ -396,6 +396,11 @@ if(UNIX)
   # convert Eigen::Index<>std::size_t Otherwise, activate all warnings.
   add_compile_options(-Wall -Wpedantic -Wextra -Wno-sign-conversion)
 
+  add_library(${PROJECT_NAME} SHARED ${${PROJECT_NAME}_SOURCES}
+                                     ${${PROJECT_NAME}_HEADERS})
+  target_include_directories(${PROJECT_NAME}
+                             PUBLIC $<INSTALL_INTERFACE:include>)
+  target_link_libraries(${PROJECT_NAME} pinocchio::pinocchio)
   modernize_target_link_libraries(
     ${PROJECT_NAME}
     SCOPE
