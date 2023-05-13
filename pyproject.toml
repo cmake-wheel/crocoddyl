@@ -15,5 +15,13 @@ homepage = "https://github.com/loco-3d/crocoddyl"
 [tool.cmeel]
 build-number = 1
 
+[tool.isort]
+profile = "black"
+
+[tool.ruff]
+extend-exclude = ["cmake", "examples/notebooks"]
+extend-select = ["RUF", "UP"]
+target-version = "py38"
+
 [tool.tomlsort]
 all = true

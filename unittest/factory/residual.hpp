@@ -9,11 +9,10 @@
 #ifndef CROCODDYL_RESIDUAL_FACTORY_HPP_
 #define CROCODDYL_RESIDUAL_FACTORY_HPP_
 
-#include "state.hpp"
-#include "residual.hpp"
-#include "crocoddyl/core/residual-base.hpp"
 #include "crocoddyl/core/numdiff/residual.hpp"
+#include "crocoddyl/core/residual-base.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"
+#include "state.hpp"
 
 namespace crocoddyl {
 namespace unittest {
@@ -52,6 +51,7 @@ class ResidualModelFactory {
 
   typedef crocoddyl::MathBaseTpl<double> MathBase;
   typedef typename MathBase::Vector6s Vector6d;
+  typedef pinocchio::GeometryObject::CollisionGeometryPtr CollisionGeometryPtr;
 
   explicit ResidualModelFactory();
   ~ResidualModelFactory();
@@ -61,7 +61,8 @@ class ResidualModelFactory {
       std::size_t nu = std::numeric_limits<std::size_t>::max()) const;
 };
 
-boost::shared_ptr<crocoddyl::ResidualModelAbstract> create_random_residual(StateModelTypes::Type state_type);
+boost::shared_ptr<crocoddyl::ResidualModelAbstract> create_random_residual(
+    StateModelTypes::Type state_type);
 
 }  // namespace unittest
 }  // namespace crocoddyl
