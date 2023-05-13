@@ -24,7 +24,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - run: python -m pip install -U pip
-      - run: python -m pip install example-robot-data[build]
+      - run: python -m pip install example-robot-data[build] scipy
       - run: echo "CMAKE_PREFIX_PATH=$(python -m cmeel cmake)" >> $GITHUB_ENV
       - run: echo "LD_LIBRARY_PATH=$(python -m cmeel lib)" >> $GITHUB_ENV
       - run: cmake -B build -S .
