@@ -2,11 +2,6 @@ if(BUILD_PYTHON_INTERFACE)
   add_subdirectory(bindings)
 endif(BUILD_PYTHON_INTERFACE)
 
-set(EXAMPLE_ROBOT_DATA_MODEL_DIR
-    "${EXAMPLE_ROBOT_DATA_INCLUDE_DIRS}/../share/example-robot-data/robots")
-add_compile_definitions(
-  EXAMPLE_ROBOT_DATA_MODEL_DIR="${EXAMPLE_ROBOT_DATA_MODEL_DIR}")
-
 file(GLOB_RECURSE ${PROJECT_NAME}_FACTORY_TEST
      ${CMAKE_CURRENT_SOURCE_DIR}/factory/*.cpp)
 
@@ -81,6 +76,7 @@ foreach(NAME ${${PROJECT_NAME}_CPP_TESTS})
 
   target_link_libraries(${UNITTEST_NAME} ${PROJECT_NAME}
                         ${PROJECT_NAME}_unittest)
+  target_link_libraries(${UNITTEST_NAME} example-robot-data::example-robot-data)
 
   add_test_cflags(
     ${UNITTEST_NAME}
