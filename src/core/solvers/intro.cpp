@@ -193,7 +193,7 @@ double SolverIntro::tryStep(const double steplength) {
 }
 
 double SolverIntro::stoppingCriteria() {
-  stop_ = std::max(hfeas_, abs(d_[0] + 0.5 * d_[1]));
+  stop_ = std::max(hfeas_, fabs(d_[0] + 0.5 * d_[1]));
   return stop_;
 }
 
