@@ -9,7 +9,7 @@ macos_arm64_task:
     CIRRUS_CLONE_SUBMODULES: true
     CIBW_ENVIRONMENT: "CMEEL_RUN_TESTS=OFF CMEEL_LOG_LEVEL=DEBUG"
     CIBW_REPAIR_WHEEL_COMMAND: ""
-    CIBW_BUILD: "cp3*"
+    CIBW_BUILD: "cp3*"  # ignore pypy, as numpy wheel are not available
     CIBW_SKIP: "cp38-*"
     PATH: /opt/homebrew/opt/python@3.10/bin:$PATH
   install_pre_requirements_script:
