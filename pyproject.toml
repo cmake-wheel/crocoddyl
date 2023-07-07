@@ -7,13 +7,10 @@ dependencies = ["example-robot-data"]
 description = "A fast and flexible implementation of Rigid Body Dynamics algorithms and their analytical derivatives"
 license = "BSD-3-Clause"
 name = "crocoddyl"
-version = "2.0.0"
+version = "2.0.1"
 
 [project.urls]
 homepage = "https://github.com/loco-3d/crocoddyl"
-
-[tool.cmeel]
-build-number = 7
 
 [tool.isort]
 known_first_party = ["crocoddyl"]
