@@ -10,7 +10,8 @@ name = "crocoddyl"
 version = "2.0.1"
 
 [project.urls]
-homepage = "https://github.com/loco-3d/crocoddyl"
+homepage = "https://github.com/cmake-wheel/crocoddyl"
+upstream = "https://github.com/loco-3d/crocoddyl"
 
 [tool.cmeel]
 build-number = 1
