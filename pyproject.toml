@@ -1,20 +1,26 @@
 [build-system]
 build-backend = "cmeel"
-requires = ["cmeel[build]", "example-robot-data[build]", "scipy"]
+requires = [
+  "cmeel-boost ~= 1.83.0",
+  "cmeel[build]",
+  "example-robot-data[build]",
+  "scipy"
+]
 
 [project]
-dependencies = ["example-robot-data"]
+dependencies = [
+  "cmeel-boost ~= 1.83.0",
+  "example-robot-data"
+]
 description = "A fast and flexible implementation of Rigid Body Dynamics algorithms and their analytical derivatives"
 license = "BSD-3-Clause"
 name = "crocoddyl"
-version = "2.0.1"
+version = "2.0.2"
 
 [project.urls]
+changelog = "https://github.com/loco-3d/crocoddyl/blob/master/CHANGELOG.md"
 homepage = "https://github.com/cmake-wheel/crocoddyl"
 upstream = "https://github.com/loco-3d/crocoddyl"
-
-[tool.cmeel]
-build-number = 1
 
 [tool.isort]
 known_first_party = ["crocoddyl"]
