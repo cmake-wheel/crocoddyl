@@ -117,12 +117,18 @@ void exposeActionAbstract() {
            &ActionModelAbstract_wrap::default_quasiStatic,
            bp::args("self", "data", "u", "x", "maxiter", "tol"))
       .add_property("nu", bp::make_function(&ActionModelAbstract_wrap::get_nu),
+                    bp::make_setter(&ActionModelAbstract_wrap::nu_,
+                                    bp::return_internal_reference<>()),
                     "dimension of control vector")
       .add_property("nr", bp::make_function(&ActionModelAbstract_wrap::get_nr),
                     "dimension of cost-residual vector")
       .add_property("ng", bp::make_function(&ActionModelAbstract_wrap::get_ng),
+                    bp::make_setter(&ActionModelAbstract_wrap::ng_,
+                                    bp::return_internal_reference<>()),
                     "number of inequality constraints")
       .add_property("nh", bp::make_function(&ActionModelAbstract_wrap::get_nh),
+                    bp::make_setter(&ActionModelAbstract_wrap::nh_,
+                                    bp::return_internal_reference<>()),
                     "number of equality constraints")
       .add_property(
           "state",
@@ -132,15 +138,13 @@ void exposeActionAbstract() {
       .add_property("g_lb",
                     bp::make_function(&ActionModelAbstract_wrap::get_g_lb,
                                       bp::return_internal_reference<>()),
+                    &ActionModelAbstract_wrap::set_g_lb,
                     "lower bound of the inequality constraints")
       .add_property("g_ub",
                     bp::make_function(&ActionModelAbstract_wrap::get_g_ub,
                                       bp::return_internal_reference<>()),
+                    &ActionModelAbstract_wrap::set_g_ub,
                     "upper bound of the inequality constraints")
-      .add_property(
-          "has_control_limits",
-          bp::make_function(&ActionModelAbstract_wrap::get_has_control_limits),
-          "indicates whether problem has finite control limits")
       .add_property("u_lb",
                     bp::make_function(&ActionModelAbstract_wrap::get_u_lb,
                                       bp::return_internal_reference<>()),
@@ -149,12 +153,15 @@ void exposeActionAbstract() {
                     bp::make_function(&ActionModelAbstract_wrap::get_u_ub,
                                       bp::return_internal_reference<>()),
                     &ActionModelAbstract_wrap::set_u_ub, "upper control limits")
-      .def(CopyableVisitor<ActionModelAbstract_wrap>())
+      .add_property(
+          "has_control_limits",
+          bp::make_function(&ActionModelAbstract_wrap::get_has_control_limits),
+          "indicates whether problem has finite control limits")
       .def(PrintableVisitor<ActionModelAbstract>());
 
   bp::register_ptr_to_python<boost::shared_ptr<ActionDataAbstract> >();
 
-  bp::class_<ActionDataAbstract, boost::noncopyable>(
+  bp::class_<ActionDataAbstract>(
       "ActionDataAbstract",
       "Abstract class for action data.\n\n"
       "In crocoddyl, an action data contains all the required information for "
