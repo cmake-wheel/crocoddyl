@@ -25,10 +25,6 @@ upstream = "https://github.com/loco-3d/crocoddyl"
 [tool.cmeel]
 build-number = 3
 
-[tool.isort]
-known_first_party = ["crocoddyl"]
-profile = "black"
-
 [tool.ruff]
 extend-exclude = ["cmake"]
 
