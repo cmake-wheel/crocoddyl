@@ -280,4 +280,6 @@ endif()
 
 # PkgConfig packaging of the project
 pkg_config_append_libs(${PROJECT_NAME})
-# pkg_config_append_boost_libs(${BOOST_REQUIRED_COMPONENTS})
+if(NOT DEFINED ENV{CMEEL_BUILD})
+  pkg_config_append_boost_libs(${BOOST_REQUIRED_COMPONENTS})
+endif()
