@@ -29,5 +29,15 @@ build-number = 3
 known_first_party = ["crocoddyl"]
 profile = "black"
 
+[tool.ruff]
+extend-exclude = ["cmake"]
+
+[tool.ruff.lint]
+extend-ignore = ["RUF012"]
+extend-select = ["I", "NPY", "RUF", "UP", "W"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["crocoddyl"]
+
 [tool.tomlsort]
 all = true
