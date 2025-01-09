@@ -22,6 +22,9 @@ changelog = "https://github.com/loco-3d/crocoddyl/blob/master/CHANGELOG.md"
 homepage = "https://github.com/cmake-wheel/crocoddyl"
 upstream = "https://github.com/loco-3d/crocoddyl"
 
+[tool.cmeel]
+build-number = 1
+
 [tool.ruff]
 extend-exclude = ["cmake"]
 
