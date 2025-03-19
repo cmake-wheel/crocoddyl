@@ -15,7 +15,7 @@ dependencies = [
 description = "A fast and flexible implementation of Rigid Body Dynamics algorithms and their analytical derivatives"
 license = "BSD-3-Clause"
 name = "crocoddyl"
-version = "2.2.0"
+version = "3.0.0"
 
 [project.urls]
 changelog = "https://github.com/loco-3d/crocoddyl/blob/master/CHANGELOG.md"
