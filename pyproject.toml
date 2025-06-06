@@ -4,18 +4,20 @@ requires = [
   "cmeel-boost ~= 1.87.0",
   "cmeel[build]",
   "example-robot-data[build]",
+  "pin ~= 3.7.0",
   "scipy"
 ]
 
 [project]
 dependencies = [
   "cmeel-boost ~= 1.87.0",
-  "example-robot-data"
+  "example-robot-data",
+  "pin ~= 3.7.0"
 ]
 description = "A fast and flexible implementation of Rigid Body Dynamics algorithms and their analytical derivatives"
 license = "BSD-3-Clause"
 name = "crocoddyl"
-version = "3.0.1"
+version = "3.0.1.1"
 
 [project.urls]
 changelog = "https://github.com/loco-3d/crocoddyl/blob/master/CHANGELOG.md"
