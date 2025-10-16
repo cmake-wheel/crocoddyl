@@ -38,7 +38,7 @@ struct ContactConstraintModelTypes {
   static const std::vector<Type> all;
 };
 
-std::ostream &operator<<(std::ostream &os,
+std::ostream& operator<<(std::ostream& os,
                          ContactConstraintModelTypes::Type type);
 
 class ContactConstraintModelFactory {

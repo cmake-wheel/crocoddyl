@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2024, LAAS-CNRS, University of Edinburgh, CTU, INRIA,
+// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh, CTU, INRIA,
 //                          University of Oxford, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -9,8 +9,6 @@
 
 #ifndef CROCODDYL_MULTIBODY_ACTIONS_CONTACT_FWDDYN_HPP_
 #define CROCODDYL_MULTIBODY_ACTIONS_CONTACT_FWDDYN_HPP_
-
-#include <stdexcept>
 
 #include "crocoddyl/core/actuation-base.hpp"
 #include "crocoddyl/core/constraints/constraint-manager.hpp"
@@ -75,6 +73,8 @@ class DifferentialActionModelContactFwdDynamicsTpl
     : public DifferentialActionModelAbstractTpl<_Scalar> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  CROCODDYL_DERIVED_CAST(DifferentialActionModelBase,
+                         DifferentialActionModelContactFwdDynamicsTpl)
 
   typedef _Scalar Scalar;
   typedef DifferentialActionModelAbstractTpl<Scalar> Base;
@@ -139,7 +139,7 @@ class DifferentialActionModelContactFwdDynamicsTpl
       std::shared_ptr<ConstraintModelManager> constraints,
       const Scalar JMinvJt_damping = Scalar(0.),
       const bool enable_force = false);
-  virtual ~DifferentialActionModelContactFwdDynamicsTpl();
+  virtual ~DifferentialActionModelContactFwdDynamicsTpl() = default;
 
   /**
    * @brief Compute the system acceleration, and cost value
@@ -152,7 +152,7 @@ class DifferentialActionModelContactFwdDynamicsTpl
    */
   virtual void calc(const std::shared_ptr<DifferentialActionDataAbstract>& data,
                     const Eigen::Ref<const VectorXs>& x,
-                    const Eigen::Ref<const VectorXs>& u);
+                    const Eigen::Ref<const VectorXs>& u) override;
 
   /**
    * @brief Compute the total cost value for nodes that depends only on the
@@ -167,7 +167,7 @@ class DifferentialActionModelContactFwdDynamicsTpl
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
    */
   virtual void calc(const std::shared_ptr<DifferentialActionDataAbstract>& data,
-                    const Eigen::Ref<const VectorXs>& x);
+                    const Eigen::Ref<const VectorXs>& x) override;
 
   /**
    * @brief Compute the derivatives of the contact dynamics, and cost function
@@ -178,7 +178,8 @@ class DifferentialActionModelContactFwdDynamicsTpl
    */
   virtual void calcDiff(
       const std::shared_ptr<DifferentialActionDataAbstract>& data,
-      const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u);
+      const Eigen::Ref<const VectorXs>& x,
+      const Eigen::Ref<const VectorXs>& u) override;
 
   /**
    * @brief Compute the derivatives of the cost functions with respect to the
@@ -193,21 +194,33 @@ class DifferentialActionModelContactFwdDynamicsTpl
    */
   virtual void calcDiff(
       const std::shared_ptr<DifferentialActionDataAbstract>& data,
-      const Eigen::Ref<const VectorXs>& x);
+      const Eigen::Ref<const VectorXs>& x) override;
 
   /**
    * @brief Create the contact forward-dynamics data
    *
    * @return contact forward-dynamics data
    */
-  virtual std::shared_ptr<DifferentialActionDataAbstract> createData();
+  virtual std::shared_ptr<DifferentialActionDataAbstract> createData() override;
+
+  /**
+   * @brief Cast the contact-fwddyn model to a different scalar type.
+   *
+   * It is useful for operations requiring different precision or scalar types.
+   *
+   * @tparam NewScalar The new scalar type to cast to.
+   * @return DifferentialActionModelContactFwdDynamicsTpl<NewScalar> A
+   * differential-action model with the new scalar type.
+   */
+  template <typename NewScalar>
+  DifferentialActionModelContactFwdDynamicsTpl<NewScalar> cast() const;
 
   /**
    * @brief Check that the given data belongs to the contact forward-dynamics
    * data
    */
   virtual bool checkData(
-      const std::shared_ptr<DifferentialActionDataAbstract>& data);
+      const std::shared_ptr<DifferentialActionDataAbstract>& data) override;
 
   /**
    * @brief @copydoc Base::quasiStatic()
@@ -215,37 +228,38 @@ class DifferentialActionModelContactFwdDynamicsTpl
   virtual void quasiStatic(
       const std::shared_ptr<DifferentialActionDataAbstract>& data,
       Eigen::Ref<VectorXs> u, const Eigen::Ref<const VectorXs>& x,
-      const std::size_t maxiter = 100, const Scalar tol = Scalar(1e-9));
+      const std::size_t maxiter = 100,
+      const Scalar tol = Scalar(1e-9)) override;
 
   /**
    * @brief Return the number of inequality constraints
    */
-  virtual std::size_t get_ng() const;
+  virtual std::size_t get_ng() const override;
 
   /**
    * @brief Return the number of equality constraints
    */
-  virtual std::size_t get_nh() const;
+  virtual std::size_t get_nh() const override;
 
   /**
    * @brief Return the number of equality terminal constraints
    */
-  virtual std::size_t get_ng_T() const;
+  virtual std::size_t get_ng_T() const override;
 
   /**
    * @brief Return the number of equality terminal constraints
    */
-  virtual std::size_t get_nh_T() const;
+  virtual std::size_t get_nh_T() const override;
 
   /**
    * @brief Return the lower bound of the inequality constraints
    */
-  virtual const VectorXs& get_g_lb() const;
+  virtual const VectorXs& get_g_lb() const override;
 
   /**
    * @brief Return the upper bound of the inequality constraints
    */
-  virtual const VectorXs& get_g_ub() const;
+  virtual const VectorXs& get_g_ub() const override;
 
   /**
    * @brief Return the actuation model
@@ -297,7 +311,7 @@ class DifferentialActionModelContactFwdDynamicsTpl
    *
    * @param[out] os  Output stream object
    */
-  virtual void print(std::ostream& os) const;
+  virtual void print(std::ostream& os) const override;
 
  protected:
   using Base::g_lb_;   //!< Lower bound of the inequality constraints
@@ -311,7 +325,7 @@ class DifferentialActionModelContactFwdDynamicsTpl
   std::shared_ptr<ContactModelMultiple> contacts_;       //!< Contact model
   std::shared_ptr<CostModelSum> costs_;                  //!< Cost model
   std::shared_ptr<ConstraintModelManager> constraints_;  //!< Constraint model
-  pinocchio::ModelTpl<Scalar>& pinocchio_;               //!< Pinocchio model
+  pinocchio::ModelTpl<Scalar>* pinocchio_;               //!< Pinocchio model
   bool with_armature_;      //!< Indicate if we have defined an armature
   VectorXs armature_;       //!< Armature vector
   Scalar JMinvJt_damping_;  //!< Damping factor used in operational space
@@ -368,6 +382,7 @@ struct DifferentialActionDataContactFwdDynamicsTpl
     pinocchio.lambda_c.resize(model->get_contacts()->get_nc_total());
     pinocchio.lambda_c.setZero();
   }
+  virtual ~DifferentialActionDataContactFwdDynamicsTpl() = default;
 
   pinocchio::DataTpl<Scalar> pinocchio;
   DataCollectorJointActMultibodyInContact multibody;
@@ -397,5 +412,10 @@ struct DifferentialActionDataContactFwdDynamicsTpl
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 #include <crocoddyl/multibody/actions/contact-fwddyn.hxx>
+
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_CLASS(
+    crocoddyl::DifferentialActionModelContactFwdDynamicsTpl)
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(
+    crocoddyl::DifferentialActionDataContactFwdDynamicsTpl)
 
 #endif  // CROCODDYL_MULTIBODY_ACTIONS_CONTACT_FWDDYN_HPP_

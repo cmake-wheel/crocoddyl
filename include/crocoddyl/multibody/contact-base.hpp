@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -10,9 +10,6 @@
 #ifndef CROCODDYL_MULTIBODY_CONTACT_BASE_HPP_
 #define CROCODDYL_MULTIBODY_CONTACT_BASE_HPP_
 
-#include <pinocchio/multibody/fwd.hpp>
-
-#include "crocoddyl/core/mathbase.hpp"
 #include "crocoddyl/core/utils/deprecate.hpp"
 #include "crocoddyl/multibody/force-base.hpp"
 #include "crocoddyl/multibody/fwd.hpp"
@@ -20,8 +17,15 @@
 
 namespace crocoddyl {
 
+class ContactModelBase {
+ public:
+  virtual ~ContactModelBase() = default;
+
+  CROCODDYL_BASE_CAST(ContactModelBase, ContactModelAbstractTpl)
+};
+
 template <typename _Scalar>
-class ContactModelAbstractTpl {
+class ContactModelAbstractTpl : public ContactModelBase {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
@@ -57,7 +61,7 @@ class ContactModelAbstractTpl {
       "pinocchio::LOCAL",
       ContactModelAbstractTpl(std::shared_ptr<StateMultibody> state,
                               const std::size_t nc);)
-  virtual ~ContactModelAbstractTpl();
+  virtual ~ContactModelAbstractTpl() = default;
 
   /**
    * @brief Compute the contact Jacobian and acceleration drift
@@ -172,6 +176,7 @@ class ContactModelAbstractTpl {
   std::size_t nu_;
   pinocchio::FrameIndex id_;        //!< Reference frame id of the contact
   pinocchio::ReferenceFrame type_;  //!< Type of contact
+  ContactModelAbstractTpl() : state_(nullptr), nc_(0), nu_(0), id_(0) {};
 };
 
 template <typename _Scalar>
@@ -197,7 +202,7 @@ struct ContactDataAbstractTpl : public ForceDataAbstractTpl<_Scalar> {
     da0_dx.setZero();
     dtau_dq.setZero();
   }
-  virtual ~ContactDataAbstractTpl() {}
+  virtual ~ContactDataAbstractTpl() = default;
 
   using Base::df_du;
   using Base::df_dx;
@@ -219,5 +224,8 @@ struct ContactDataAbstractTpl : public ForceDataAbstractTpl<_Scalar> {
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/multibody/contact-base.hxx"
+
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_CLASS(crocoddyl::ContactModelAbstractTpl)
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(crocoddyl::ContactDataAbstractTpl)
 
 #endif  // CROCODDYL_MULTIBODY_CONTACT_BASE_HPP_

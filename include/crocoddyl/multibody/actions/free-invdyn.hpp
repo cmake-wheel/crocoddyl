@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2024, Heriot-Watt University, University of Edinburgh
+// Copyright (C) 2021-2025, Heriot-Watt University, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -9,14 +9,11 @@
 #ifndef CROCODDYL_MULTIBODY_ACTIONS_FREE_INVDYN_HPP_
 #define CROCODDYL_MULTIBODY_ACTIONS_FREE_INVDYN_HPP_
 
-#include <stdexcept>
-
 #include "crocoddyl/core/actuation-base.hpp"
 #include "crocoddyl/core/constraints/constraint-manager.hpp"
 #include "crocoddyl/core/costs/cost-sum.hpp"
 #include "crocoddyl/core/diff-action-base.hpp"
 #include "crocoddyl/core/residual-base.hpp"
-#include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/multibody/data/multibody.hpp"
 #include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"
@@ -43,6 +40,8 @@ class DifferentialActionModelFreeInvDynamicsTpl
     : public DifferentialActionModelAbstractTpl<_Scalar> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  CROCODDYL_DERIVED_CAST(DifferentialActionModelBase,
+                         DifferentialActionModelFreeInvDynamicsTpl)
 
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
@@ -85,7 +84,7 @@ class DifferentialActionModelFreeInvDynamicsTpl
       std::shared_ptr<ActuationModelAbstract> actuation,
       std::shared_ptr<CostModelSum> costs,
       std::shared_ptr<ConstraintModelManager> constraints);
-  virtual ~DifferentialActionModelFreeInvDynamicsTpl();
+  virtual ~DifferentialActionModelFreeInvDynamicsTpl() = default;
 
   /**
    * @brief Compute the system acceleration, cost value and constraint residuals
@@ -99,7 +98,7 @@ class DifferentialActionModelFreeInvDynamicsTpl
    */
   virtual void calc(const std::shared_ptr<DifferentialActionDataAbstract>& data,
                     const Eigen::Ref<const VectorXs>& x,
-                    const Eigen::Ref<const VectorXs>& u);
+                    const Eigen::Ref<const VectorXs>& u) override;
 
   /**
    * @brief @copydoc Base::calc(const
@@ -107,7 +106,7 @@ class DifferentialActionModelFreeInvDynamicsTpl
    * Eigen::Ref<const VectorXs>& x)
    */
   virtual void calc(const std::shared_ptr<DifferentialActionDataAbstract>& data,
-                    const Eigen::Ref<const VectorXs>& x);
+                    const Eigen::Ref<const VectorXs>& x) override;
 
   /**
    * @brief Compute the derivatives of the dynamics, cost and constraint
@@ -124,7 +123,8 @@ class DifferentialActionModelFreeInvDynamicsTpl
    */
   virtual void calcDiff(
       const std::shared_ptr<DifferentialActionDataAbstract>& data,
-      const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& u);
+      const Eigen::Ref<const VectorXs>& x,
+      const Eigen::Ref<const VectorXs>& u) override;
 
   /**
    * @brief @copydoc Base::calcDiff(const
@@ -133,21 +133,33 @@ class DifferentialActionModelFreeInvDynamicsTpl
    */
   virtual void calcDiff(
       const std::shared_ptr<DifferentialActionDataAbstract>& data,
-      const Eigen::Ref<const VectorXs>& x);
+      const Eigen::Ref<const VectorXs>& x) override;
 
   /**
    * @brief Create the free inverse-dynamics data
    *
    * @return free inverse-dynamics data
    */
-  virtual std::shared_ptr<DifferentialActionDataAbstract> createData();
+  virtual std::shared_ptr<DifferentialActionDataAbstract> createData() override;
+
+  /**
+   * @brief Cast the free-invdyn model to a different scalar type.
+   *
+   * It is useful for operations requiring different precision or scalar types.
+   *
+   * @tparam NewScalar The new scalar type to cast to.
+   * @return DifferentialActionModelFreeInvDynamicsTpl<NewScalar> A
+   * differential-action model with the new scalar type.
+   */
+  template <typename NewScalar>
+  DifferentialActionModelFreeInvDynamicsTpl<NewScalar> cast() const;
 
   /**
    * @brief Checks that a specific data belongs to the free inverse-dynamics
    * model
    */
   virtual bool checkData(
-      const std::shared_ptr<DifferentialActionDataAbstract>& data);
+      const std::shared_ptr<DifferentialActionDataAbstract>& data) override;
 
   /**
    * @brief Computes the quasic static commands
@@ -165,37 +177,38 @@ class DifferentialActionModelFreeInvDynamicsTpl
   virtual void quasiStatic(
       const std::shared_ptr<DifferentialActionDataAbstract>& data,
       Eigen::Ref<VectorXs> u, const Eigen::Ref<const VectorXs>& x,
-      const std::size_t maxiter = 100, const Scalar tol = Scalar(1e-9));
+      const std::size_t maxiter = 100,
+      const Scalar tol = Scalar(1e-9)) override;
 
   /**
    * @brief Return the number of inequality constraints
    */
-  virtual std::size_t get_ng() const;
+  virtual std::size_t get_ng() const override;
 
   /**
    * @brief Return the number of equality constraints
    */
-  virtual std::size_t get_nh() const;
+  virtual std::size_t get_nh() const override;
 
   /**
    * @brief Return the number of equality terminal constraints
    */
-  virtual std::size_t get_ng_T() const;
+  virtual std::size_t get_ng_T() const override;
 
   /**
    * @brief Return the number of equality terminal constraints
    */
-  virtual std::size_t get_nh_T() const;
+  virtual std::size_t get_nh_T() const override;
 
   /**
    * @brief Return the lower bound of the inequality constraints
    */
-  virtual const VectorXs& get_g_lb() const;
+  virtual const VectorXs& get_g_lb() const override;
 
   /**
    * @brief Return the upper bound of the inequality constraints
    */
-  virtual const VectorXs& get_g_ub() const;
+  virtual const VectorXs& get_g_ub() const override;
 
   /**
    * @brief Return the actuation model
@@ -222,7 +235,7 @@ class DifferentialActionModelFreeInvDynamicsTpl
    *
    * @param[out] os  Output stream object
    */
-  virtual void print(std::ostream& os) const;
+  virtual void print(std::ostream& os) const override;
 
  protected:
   using Base::g_lb_;   //!< Lower bound of the inequality constraints
@@ -237,7 +250,7 @@ class DifferentialActionModelFreeInvDynamicsTpl
   std::shared_ptr<ActuationModelAbstract> actuation_;    //!< Actuation model
   std::shared_ptr<CostModelSum> costs_;                  //!< Cost model
   std::shared_ptr<ConstraintModelManager> constraints_;  //!< Constraint model
-  pinocchio::ModelTpl<Scalar>& pinocchio_;               //!< Pinocchio model
+  pinocchio::ModelTpl<Scalar>* pinocchio_;               //!< Pinocchio model
 
  public:
   /**
@@ -255,6 +268,9 @@ class DifferentialActionModelFreeInvDynamicsTpl
   class ResidualModelActuation : public ResidualModelAbstractTpl<_Scalar> {
    public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+    CROCODDYL_INNER_DERIVED_CAST(ResidualModelBase,
+                                 DifferentialActionModelFreeInvDynamicsTpl,
+                                 ResidualModelActuation)
 
     typedef _Scalar Scalar;
     typedef MathBaseTpl<Scalar> MathBase;
@@ -276,7 +292,7 @@ class DifferentialActionModelFreeInvDynamicsTpl
                            const std::size_t nu)
         : Base(state, state->get_nv() - nu, state->get_nv(), true, true, true),
           na_(nu) {}
-    virtual ~ResidualModelActuation() {}
+    virtual ~ResidualModelActuation() = default;
 
     /**
      * @brief Compute the actuation residual
@@ -287,7 +303,7 @@ class DifferentialActionModelFreeInvDynamicsTpl
      */
     virtual void calc(const std::shared_ptr<ResidualDataAbstract>& data,
                       const Eigen::Ref<const VectorXs>&,
-                      const Eigen::Ref<const VectorXs>&) {
+                      const Eigen::Ref<const VectorXs>&) override {
       typename Data::ResidualDataActuation* d =
           static_cast<typename Data::ResidualDataActuation*>(data.get());
       // Update the under-actuation set and residual
@@ -306,7 +322,7 @@ class DifferentialActionModelFreeInvDynamicsTpl
      * data, const Eigen::Ref<const VectorXs>& x)
      */
     virtual void calc(const std::shared_ptr<ResidualDataAbstract>& data,
-                      const Eigen::Ref<const VectorXs>&) {
+                      const Eigen::Ref<const VectorXs>&) override {
       data->r.setZero();
     }
 
@@ -319,7 +335,7 @@ class DifferentialActionModelFreeInvDynamicsTpl
      */
     virtual void calcDiff(const std::shared_ptr<ResidualDataAbstract>& data,
                           const Eigen::Ref<const VectorXs>&,
-                          const Eigen::Ref<const VectorXs>&) {
+                          const Eigen::Ref<const VectorXs>&) override {
       typename Data::ResidualDataActuation* d =
           static_cast<typename Data::ResidualDataActuation*>(data.get());
       std::size_t nrow = 0;
@@ -343,7 +359,7 @@ class DifferentialActionModelFreeInvDynamicsTpl
      * VectorXs>& x)
      */
     virtual void calcDiff(const std::shared_ptr<ResidualDataAbstract>& data,
-                          const Eigen::Ref<const VectorXs>&) {
+                          const Eigen::Ref<const VectorXs>&) override {
       data->Rx.setZero();
       data->Ru.setZero();
     }
@@ -354,10 +370,34 @@ class DifferentialActionModelFreeInvDynamicsTpl
      * @return Actuation residual data
      */
     virtual std::shared_ptr<ResidualDataAbstract> createData(
-        DataCollectorAbstract* const data) {
+        DataCollectorAbstract* const data) override {
       return std::allocate_shared<typename Data::ResidualDataActuation>(
           Eigen::aligned_allocator<typename Data::ResidualDataActuation>(),
           this, data);
+    }
+
+    /**
+     * @brief Cast the actuation-residual model to a different scalar type.
+     *
+     * It is useful for operations requiring different precision or scalar
+     * types.
+     *
+     * @tparam NewScalar The new scalar type to cast to.
+     * @return typename
+     * DifferentialActionModelFreeInvDynamicsTpl<NewScalar>::ResidualModelActuation
+     * A residual model with the new scalar type.
+     */
+    template <typename NewScalar>
+    typename DifferentialActionModelFreeInvDynamicsTpl<
+        NewScalar>::ResidualModelActuation
+    cast() const {
+      typedef typename DifferentialActionModelFreeInvDynamicsTpl<
+          NewScalar>::ResidualModelActuation ReturnType;
+      typedef StateMultibodyTpl<NewScalar> StateType;
+      ReturnType ret(std::static_pointer_cast<StateType>(
+                         state_->template cast<NewScalar>()),
+                     na_);
+      return ret;
     }
 
     /**
@@ -365,7 +405,7 @@ class DifferentialActionModelFreeInvDynamicsTpl
      *
      * @param[out] os  Output stream object
      */
-    virtual void print(std::ostream& os) const {
+    virtual void print(std::ostream& os) const override {
       os << "ResidualModelActuation {nx=" << state_->get_nx()
          << ", ndx=" << state_->get_ndx() << ", nu=" << nu_ << ", na=" << na_
          << "}";
@@ -410,6 +450,7 @@ struct DifferentialActionDataFreeInvDynamicsTpl
     constraints->shareMemory(this);
     tmp_xstatic.setZero();
   }
+  virtual ~DifferentialActionDataFreeInvDynamicsTpl() = default;
 
   pinocchio::DataTpl<Scalar> pinocchio;                //!< Pinocchio data
   DataCollectorJointActMultibody multibody;            //!< Multibody data
@@ -475,5 +516,10 @@ struct DifferentialActionDataFreeInvDynamicsTpl
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 #include <crocoddyl/multibody/actions/free-invdyn.hxx>
+
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_CLASS(
+    crocoddyl::DifferentialActionModelFreeInvDynamicsTpl)
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(
+    crocoddyl::DifferentialActionDataFreeInvDynamicsTpl)
 
 #endif  // CROCODDYL_MULTIBODY_ACTIONS_FREE_INVDYN_HPP_

@@ -8,10 +8,6 @@
 
 #include "crocoddyl/core/solvers/box-fddp.hpp"
 
-#include <iostream>
-
-#include "crocoddyl/core/utils/exception.hpp"
-
 namespace crocoddyl {
 
 SolverBoxFDDP::SolverBoxFDDP(std::shared_ptr<ShootingProblem> problem)

@@ -9,8 +9,6 @@
 #ifndef CROCODDYL_CORE_DATA_CONTACTS_HPP_
 #define CROCODDYL_CORE_DATA_CONTACTS_HPP_
 
-#include <memory>
-
 #include "crocoddyl/multibody/contacts/multiple-contacts.hpp"
 #include "crocoddyl/multibody/data/multibody.hpp"
 #include "crocoddyl/multibody/fwd.hpp"
@@ -21,7 +19,7 @@ template <typename Scalar>
 struct DataCollectorContactTpl : virtual DataCollectorAbstractTpl<Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-  DataCollectorContactTpl<Scalar>(
+  DataCollectorContactTpl(
       std::shared_ptr<ContactDataMultipleTpl<Scalar> > contacts)
       : DataCollectorAbstractTpl<Scalar>(), contacts(contacts) {}
   virtual ~DataCollectorContactTpl() {}
@@ -75,5 +73,13 @@ struct DataCollectorJointActMultibodyInContactTpl
 };
 
 }  // namespace crocoddyl
+
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(crocoddyl::DataCollectorContactTpl)
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(
+    crocoddyl::DataCollectorMultibodyInContactTpl)
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(
+    crocoddyl::DataCollectorActMultibodyInContactTpl)
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(
+    crocoddyl::DataCollectorJointActMultibodyInContactTpl)
 
 #endif  // CROCODDYL_CORE_DATA_MULTIBODY_IN_CONTACT_HPP_

@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -10,12 +10,6 @@
 #ifndef CROCODDYL_MULTIBODY_IMPULSES_MULTIPLE_IMPULSES_HPP_
 #define CROCODDYL_MULTIBODY_IMPULSES_MULTIPLE_IMPULSES_HPP_
 
-#include <map>
-#include <set>
-#include <string>
-#include <utility>
-
-#include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/multibody/impulse-base.hpp"
 
@@ -33,6 +27,13 @@ struct ImpulseItemTpl {
                  std::shared_ptr<ImpulseModelAbstract> impulse,
                  const bool active = true)
       : name(name), impulse(impulse), active(active) {}
+
+  template <typename NewScalar>
+  ImpulseItemTpl<NewScalar> cast() const {
+    typedef ImpulseItemTpl<NewScalar> ReturnType;
+    ReturnType ret(name, impulse->template cast<NewScalar>(), active);
+    return ret;
+  }
 
   /**
    * @brief Print information on the impulse item
@@ -201,6 +202,18 @@ class ImpulseModelMultipleTpl {
       pinocchio::DataTpl<Scalar>* const data);
 
   /**
+   * @brief Cast the multi-impulse model to a different scalar type.
+   *
+   * It is useful for operations requiring different precision or scalar types.
+   *
+   * @tparam NewScalar The new scalar type to cast to.
+   * @return ImpulseModelMultipleTpl<NewScalar> A multi-impulse model with the
+   * new scalar type.
+   */
+  template <typename NewScalar>
+  ImpulseModelMultipleTpl<NewScalar> cast() const;
+
+  /**
    * @brief Return the multibody state
    */
   const std::shared_ptr<StateMultibody>& get_state() const;
@@ -322,5 +335,9 @@ struct ImpulseDataMultipleTpl {
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/multibody/impulses/multiple-impulses.hxx"
+
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(crocoddyl::ImpulseItemTpl)
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_CLASS(crocoddyl::ImpulseModelMultipleTpl)
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(crocoddyl::ImpulseDataMultipleTpl)
 
 #endif  // CROCODDYL_MULTIBODY_IMPULSES_MULTIPLE_IMPULSES_HPP_

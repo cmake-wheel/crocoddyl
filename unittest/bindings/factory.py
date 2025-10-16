@@ -1442,7 +1442,7 @@ class Contact6DModelDerived(crocoddyl.ContactModelAbstract):
             v_partial_dq,
             a_partial_dq,
             a_partial_dv,
-            a_partial_da,
+            _,
         ) = pinocchio.getJointAccelerationDerivatives(
             self.state.pinocchio, data.pinocchio, joint, pinocchio.ReferenceFrame.LOCAL
         )
@@ -1792,7 +1792,11 @@ class DDPDerived(crocoddyl.SolverAbstract):
                 self.xs[0], self.problem.x0
             )
             for i, (m, d, x) in enumerate(
-                zip(self.problem.runningModels, self.problem.runningDatas, self.xs[1:])
+                zip(
+                    self.problem.runningModels,
+                    self.problem.runningDatas,
+                    self.xs.tolist()[1:],
+                )
             ):
                 self.fs[i + 1] = m.state.diff(x, d.xnext)
         return self.cost
@@ -2050,7 +2054,11 @@ class FDDPDerived(DDPDerived):
                 self.xs[0], self.problem.x0
             )
             for i, (m, d, x) in enumerate(
-                zip(self.problem.runningModels, self.problem.runningDatas, self.xs[1:])
+                zip(
+                    self.problem.runningModels,
+                    self.problem.runningDatas,
+                    self.xs.tolist()[1:],
+                )
             ):
                 self.fs[i + 1] = m.state.diff(x, d.xnext)
         elif not self.wasFeasible:

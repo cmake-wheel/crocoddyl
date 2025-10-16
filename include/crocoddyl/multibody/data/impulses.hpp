@@ -9,8 +9,6 @@
 #ifndef CROCODDYL_CORE_DATA_IMPULSES_HPP_
 #define CROCODDYL_CORE_DATA_IMPULSES_HPP_
 
-#include <memory>
-
 #include "crocoddyl/multibody/data/multibody.hpp"
 #include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/multibody/impulses/multiple-impulses.hpp"
@@ -43,5 +41,9 @@ struct DataCollectorMultibodyInImpulseTpl : DataCollectorMultibodyTpl<Scalar>,
 };
 
 }  // namespace crocoddyl
+
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(crocoddyl::DataCollectorImpulseTpl)
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(
+    crocoddyl::DataCollectorMultibodyInImpulseTpl)
 
 #endif  // CROCODDYL_CORE_DATA_MULTIBODY_IN_IMPULSE_HPP_

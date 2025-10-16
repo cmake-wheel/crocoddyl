@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2024, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -17,14 +17,15 @@
 // #include "crocoddyl/multibody/residuals/centroidal-momentum.hpp"
 #include "crocoddyl/core/activations/quadratic.hpp"
 #include "crocoddyl/core/costs/cost-sum.hpp"
-#include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/multibody/residuals/contact-friction-cone.hpp"
 #include "crocoddyl/multibody/residuals/contact-wrench-cone.hpp"
 #include "crocoddyl/multibody/residuals/frame-placement.hpp"
 #include "crocoddyl/multibody/residuals/frame-rotation.hpp"
 #include "crocoddyl/multibody/residuals/frame-translation.hpp"
 #include "crocoddyl/multibody/residuals/frame-velocity.hpp"
+#ifdef CROCODDYL_WITH_PAIR_COLLISION
 #include "crocoddyl/multibody/residuals/pair-collision.hpp"
+#endif  // CROCODDYL_WITH_PAIR_COLLISION
 
 namespace crocoddyl {
 namespace unittest {
@@ -34,8 +35,10 @@ const std::vector<CostModelTypes::Type> CostModelTypes::all(
 const std::vector<CostModelNoFFTypes::Type> CostModelNoFFTypes::all(
     CostModelNoFFTypes::init_all());
 #ifdef PINOCCHIO_WITH_HPP_FCL
+#ifdef CROCODDYL_WITH_PAIR_COLLISION
 const std::vector<CostModelCollisionTypes::Type> CostModelCollisionTypes::all(
     CostModelCollisionTypes::init_all());
+#endif  // CROCODDYL_WITH_PAIR_COLLISION
 #endif  // PINOCCHIO_WITH_HPP_FCL
 
 std::ostream& operator<<(std::ostream& os, CostModelTypes::Type type) {
@@ -88,6 +91,7 @@ std::ostream& operator<<(std::ostream& os, CostModelNoFFTypes::Type type) {
 }
 
 #ifdef PINOCCHIO_WITH_HPP_FCL
+#ifdef CROCODDYL_WITH_PAIR_COLLISION
 std::ostream& operator<<(std::ostream& os, CostModelCollisionTypes::Type type) {
   switch (type) {
     case CostModelCollisionTypes::CostModelResidualPairCollision:
@@ -101,6 +105,7 @@ std::ostream& operator<<(std::ostream& os, CostModelCollisionTypes::Type type) {
   }
   return os;
 }
+#endif  // CROCODDYL_WITH_PAIR_COLLISION
 #endif  // PINOCCHIO_WITH_HPP_FCL
 
 CostModelFactory::CostModelFactory() {}
@@ -126,7 +131,7 @@ std::shared_ptr<crocoddyl::CostModelAbstract> CostModelFactory::create(
     case CostModelTypes::CostModelResidualState:
       cost = std::make_shared<crocoddyl::CostModelResidual>(
           state, activation_factory.create(activation_type, state->get_ndx()),
-          std::make_shared<crocoddyl::ResidualModelState>(state, state->rand(),
+          std::make_shared<crocoddyl::ResidualModelState>(state, state->zero(),
                                                           nu));
       break;
     case CostModelTypes::CostModelResidualControl:
@@ -207,6 +212,7 @@ std::shared_ptr<crocoddyl::CostModelAbstract> CostModelFactory::create(
 }
 
 #ifdef PINOCCHIO_WITH_HPP_FCL
+#ifdef CROCODDYL_WITH_PAIR_COLLISION
 std::shared_ptr<crocoddyl::CostModelAbstract> CostModelFactory::create(
     CostModelCollisionTypes::Type cost_type, StateModelTypes::Type state_type,
     std::size_t nu) const {
@@ -226,7 +232,6 @@ std::shared_ptr<crocoddyl::CostModelAbstract> CostModelFactory::create(
 
   std::shared_ptr<pinocchio::GeometryModel> geometry =
       std::make_shared<pinocchio::GeometryModel>(pinocchio::GeometryModel());
-#if PINOCCHIO_VERSION_AT_LEAST(3, 0, 0)
   pinocchio::GeomIndex ig_frame =
       geometry->addGeometryObject(pinocchio::GeometryObject(
           "frame", frame_index,
@@ -240,38 +245,15 @@ std::shared_ptr<crocoddyl::CostModelAbstract> CostModelFactory::create(
               .parentJoint,
           CollisionGeometryPtr(new hpp::fcl::Capsule(0, beta)),
           frame_SE3_obstacle));
-#else
-  pinocchio::GeomIndex ig_frame =
-      geometry->addGeometryObject(pinocchio::GeometryObject(
-          "frame", frame_index,
-          state->get_pinocchio()->frames[frame_index].parent,
-          CollisionGeometryPtr(new hpp::fcl::Capsule(0, alpha)), frame_SE3));
-  pinocchio::GeomIndex ig_obs =
-      geometry->addGeometryObject(pinocchio::GeometryObject(
-          "obs", state->get_pinocchio()->getFrameId("universe"),
-          state->get_pinocchio()
-              ->frames[state->get_pinocchio()->getFrameId("universe")]
-              .parent,
-          CollisionGeometryPtr(new hpp::fcl::Capsule(0, beta)),
-          frame_SE3_obstacle));
-#endif
   geometry->addCollisionPair(pinocchio::CollisionPair(ig_frame, ig_obs));
 
   switch (cost_type) {
     case CostModelCollisionTypes::CostModelResidualPairCollision:
-#if PINOCCHIO_VERSION_AT_LEAST(3, 0, 0)
       cost = std::make_shared<crocoddyl::CostModelResidual>(
           state, std::make_shared<crocoddyl::ActivationModelQuad>(3),
           std::make_shared<crocoddyl::ResidualModelPairCollision>(
               state, nu, geometry, 0,
               state->get_pinocchio()->frames[frame_index].parentJoint));
-#else
-      cost = std::make_shared<crocoddyl::CostModelResidual>(
-          state, std::make_shared<crocoddyl::ActivationModelQuad>(3),
-          std::make_shared<crocoddyl::ResidualModelPairCollision>(
-              state, nu, geometry, 0,
-              state->get_pinocchio()->frames[frame_index].parent));
-#endif
       break;
     default:
       throw_pretty(__FILE__ ": Wrong CostModelTypes::Type given");
@@ -279,6 +261,7 @@ std::shared_ptr<crocoddyl::CostModelAbstract> CostModelFactory::create(
   }
   return cost;
 }
+#endif  // CROCODDYL_WITH_PAIR_COLLISION
 #endif  // PINOCCHIO_WITH_HPP_FCL
 
 std::shared_ptr<crocoddyl::CostModelAbstract> create_random_cost(

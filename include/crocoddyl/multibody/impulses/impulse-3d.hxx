@@ -1,17 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2024, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
-
-#include <pinocchio/algorithm/frames.hpp>
-#include <pinocchio/algorithm/kinematics-derivatives.hpp>
-
-#include "crocoddyl/core/utils/exception.hpp"
-#include "crocoddyl/multibody/impulses/impulse-3d.hpp"
 
 namespace crocoddyl {
 
@@ -22,9 +16,6 @@ ImpulseModel3DTpl<Scalar>::ImpulseModel3DTpl(
     : Base(state, type, 3) {
   id_ = id;
 }
-
-template <typename Scalar>
-ImpulseModel3DTpl<Scalar>::~ImpulseModel3DTpl() {}
 
 template <typename Scalar>
 void ImpulseModel3DTpl<Scalar>::calc(
@@ -54,13 +45,8 @@ void ImpulseModel3DTpl<Scalar>::calcDiff(
     const Eigen::Ref<const VectorXs>&) {
   std::shared_ptr<Data> d = std::static_pointer_cast<Data>(data);
 
-#if PINOCCHIO_VERSION_AT_LEAST(3, 0, 0)
   const pinocchio::JointIndex joint =
       state_->get_pinocchio()->frames[d->frame].parentJoint;
-#else
-  const pinocchio::JointIndex joint =
-      state_->get_pinocchio()->frames[d->frame].parent;
-#endif
   pinocchio::getJointVelocityDerivatives(*state_->get_pinocchio().get(),
                                          *d->pinocchio, joint, pinocchio::LOCAL,
                                          d->v_partial_dq, d->v_partial_dv);
@@ -120,6 +106,17 @@ std::shared_ptr<ImpulseDataAbstractTpl<Scalar> >
 ImpulseModel3DTpl<Scalar>::createData(pinocchio::DataTpl<Scalar>* const data) {
   return std::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this,
                                     data);
+}
+
+template <typename Scalar>
+template <typename NewScalar>
+ImpulseModel3DTpl<NewScalar> ImpulseModel3DTpl<Scalar>::cast() const {
+  typedef ImpulseModel3DTpl<NewScalar> ReturnType;
+  typedef StateMultibodyTpl<NewScalar> StateType;
+  ReturnType ret(
+      std::make_shared<StateType>(state_->template cast<NewScalar>()), id_,
+      type_);
+  return ret;
 }
 
 template <typename Scalar>

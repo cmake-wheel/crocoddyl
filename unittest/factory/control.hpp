@@ -9,11 +9,8 @@
 #ifndef CROCODDYL_CONTROL_FACTORY_HPP_
 #define CROCODDYL_CONTROL_FACTORY_HPP_
 
-#include <vector>
-
 #include "crocoddyl/core/control-base.hpp"
 #include "crocoddyl/core/fwd.hpp"
-#include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
 namespace unittest {

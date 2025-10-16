@@ -6,6 +6,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [3.1.0] - 1980-01-01
+
+* Allow use of BUILD_STANDALONE_PYTHON_INTERFACE CMake option in https://github.com/loco-3d/crocoddyl/pull/1434
+* Migrated notebooks to Meshcat in https://github.com/loco-3d/crocoddyl/pull/1404
+* Updated the rotation transpose in contact wrench cone to re-use the same object to avoid additional transpose operations. https://github.com/loco-3d/crocoddyl/pull/1343
+* Switched to a multiply operation instead of divide for efficiency. https://github.com/loco-3d/crocoddyl/pull/1343
+* Fix Python bindings of action getters in https://github.com/loco-3d/crocoddyl/pull/1374
+* Created independent Python modules associated to each scalar in https://github.com/loco-3d/crocoddyl/pull/1372
+* Introduced CodeGen and AutoDiff in Python + pre-compiled headers in https://github.com/loco-3d/crocoddyl/pull/1370
+* Introduced explicit template instantiation in https://github.com/loco-3d/crocoddyl/pull/1367
+* Fixed error message building crocoddyl.launch crocoddyl.rviz as Python files in https://github.com/loco-3d/crocoddyl/pull/1369
+* Created Python bindings for (diff)-action getters in https://github.com/loco-3d/crocoddyl/pull/1362
+* Enabled casting and multi-scalar Python bindings in https://github.com/loco-3d/crocoddyl/pull/1346
+* Compute LU decomposition using permutationP in https://github.com/loco-3d/crocoddyl/pull/1351
+* Force DifferentialActionDataContactInvDynamics to update df_du for all contacts in  https://github.com/loco-3d/crocoddyl/pull/1348
+* Add a nix shortcut start jupyter lab, with eg. `nix run .#jupyter in https://github.com/loco-3d/crocoddyl/pull/1396
+
 ## [3.0.1] - 2025-03-21
 
 * Add install version in https://github.com/loco-3d/crocoddyl/pull/1355
@@ -324,7 +341,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 Initial release
 
-[Unreleased]: https://github.com/loco-3d/crocoddyl/compare/v3.0.1...HEAD
+[Unreleased]: https://github.com/loco-3d/crocoddyl/compare/v3.1.0...HEAD
+[3.1.0]: https://github.com/loco-3d/crocoddyl/compare/v3.0.1...v3.1.0
 [3.0.1]: https://github.com/loco-3d/crocoddyl/compare/v3.0.0...v3.0.1
 [3.0.0]: https://github.com/loco-3d/crocoddyl/compare/v2.2.0...v3.0.0
 [2.2.0]: https://github.com/loco-3d/crocoddyl/compare/v2.1.0...v2.2.0

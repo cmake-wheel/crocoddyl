@@ -1,21 +1,18 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2021, LAAS-CNRS, University of Edinburgh, University of
-// Oxford Copyright note valid unless otherwise stated in individual files. All
+// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
+//                          University of Oxford, Heriot-Watt University
+// Copyright note valid unless otherwise stated in individual files. All
 // rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifndef CROCODDYL_CORE_OPTCTRL_SHOOTING_HPP_
 #define CROCODDYL_CORE_OPTCTRL_SHOOTING_HPP_
 
-#include <stdexcept>
-#include <vector>
-
 #include "crocoddyl/core/action-base.hpp"
 #include "crocoddyl/core/fwd.hpp"
 #include "crocoddyl/core/utils/deprecate.hpp"
-#include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
 
@@ -193,6 +190,18 @@ class ShootingProblemTpl {
                    std::shared_ptr<ActionModelAbstract> model);
 
   /**
+   * @brief Cast the shooting problem to a different scalar type.
+   *
+   * It is useful for operations requiring different precision or scalar types.
+   *
+   * @tparam NewScalar The new scalar type to cast to.
+   * @return ShootingProblemTpl<NewScalar> A shooting problem with the
+   * new scalar type.
+   */
+  template <typename NewScalar>
+  ShootingProblemTpl<NewScalar> cast() const;
+
+  /**
    * @brief Return the number of running nodes
    */
   std::size_t get_T() const;
@@ -259,12 +268,6 @@ class ShootingProblemTpl {
   std::size_t get_ndx() const;
 
   /**
-   * @brief Return the maximum dimension of the control vector
-   */
-  DEPRECATED("Compute yourself the maximum dimension of the control vector",
-             std::size_t get_nu_max() const;)
-
-  /**
    * @brief Return the number of threads
    */
   std::size_t get_nthreads() const;
@@ -295,7 +298,6 @@ class ShootingProblemTpl {
       running_datas_;     //!< Running action data
   std::size_t nx_;        //!< State dimension
   std::size_t ndx_;       //!< State rate dimension
-  std::size_t nu_max_;    //!< Maximum control dimension
   std::size_t nthreads_;  //!< Number of threads launch by the multi-threading
                           //!< application
   bool is_updated_;
@@ -310,5 +312,10 @@ class ShootingProblemTpl {
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/core/optctrl/shooting.hxx"
+
+extern template class CROCODDYL_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI
+    crocoddyl::ShootingProblemTpl<double>;
+extern template class CROCODDYL_EXPLICIT_INSTANTIATION_DECLARATION_DLLAPI
+    crocoddyl::ShootingProblemTpl<float>;
 
 #endif  // CROCODDYL_CORE_OPTCTRL_SHOOTING_HPP_

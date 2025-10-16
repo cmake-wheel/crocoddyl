@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2014-2024, Heriot-Watt University
+// Copyright (C) 2014-2025, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -9,12 +9,7 @@
 #ifndef CROCODDYL_MULTIBODY_ACTUATIONS_PROPELLERS_HPP_
 #define CROCODDYL_MULTIBODY_ACTUATIONS_PROPELLERS_HPP_
 
-#include <pinocchio/multibody/fwd.hpp>
-#include <pinocchio/spatial/se3.hpp>
-#include <vector>
-
 #include "crocoddyl/core/actuation-base.hpp"
-#include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/multibody/states/multibody.hpp"
 
 namespace crocoddyl {
@@ -74,6 +69,15 @@ struct ThrusterTpl {
         min_thrust(clone.min_thrust),
         max_thrust(clone.max_thrust) {}
 
+  template <typename NewScalar>
+  ThrusterTpl<NewScalar> cast() const {
+    typedef ThrusterTpl<NewScalar> ReturnType;
+    ReturnType ret(
+        pose.template cast<NewScalar>(), scalar_cast<NewScalar>(ctorque), type,
+        scalar_cast<NewScalar>(min_thrust), scalar_cast<NewScalar>(max_thrust));
+    return ret;
+  }
+
   ThrusterTpl& operator=(const ThrusterTpl<Scalar>& other) {
     if (this != &other) {
       pose = other.pose;
@@ -132,6 +136,10 @@ template <typename _Scalar>
 class ActuationModelFloatingBaseThrustersTpl
     : public ActuationModelAbstractTpl<_Scalar> {
  public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  CROCODDYL_DERIVED_CAST(ActuationModelBase,
+                         ActuationModelFloatingBaseThrustersTpl)
+
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
   typedef ActuationModelAbstractTpl<Scalar> Base;
@@ -179,7 +187,7 @@ class ActuationModelFloatingBaseThrustersTpl
     // Update the floating base actuation part
     set_thrusters(thrusters_);
   }
-  virtual ~ActuationModelFloatingBaseThrustersTpl() {}
+  virtual ~ActuationModelFloatingBaseThrustersTpl() = default;
 
   /**
    * @brief Compute the actuation signal and actuation set from its thrust
@@ -191,7 +199,7 @@ class ActuationModelFloatingBaseThrustersTpl
    */
   virtual void calc(const std::shared_ptr<Data>& data,
                     const Eigen::Ref<const VectorXs>&,
-                    const Eigen::Ref<const VectorXs>& u) {
+                    const Eigen::Ref<const VectorXs>& u) override {
     if (static_cast<std::size_t>(u.size()) != nu_) {
       throw_pretty(
           "Invalid argument: " << "u has wrong dimension (it should be " +
@@ -214,11 +222,11 @@ class ActuationModelFloatingBaseThrustersTpl
 #ifndef NDEBUG
   virtual void calcDiff(const std::shared_ptr<Data>& data,
                         const Eigen::Ref<const VectorXs>&,
-                        const Eigen::Ref<const VectorXs>&) {
+                        const Eigen::Ref<const VectorXs>&) override {
 #else
   virtual void calcDiff(const std::shared_ptr<Data>&,
                         const Eigen::Ref<const VectorXs>&,
-                        const Eigen::Ref<const VectorXs>&) {
+                        const Eigen::Ref<const VectorXs>&) override {
 #endif
     // The derivatives has constant values which were set in createData.
     assert_pretty(MatrixXs(data->dtau_du).isApprox(W_thrust_),
@@ -227,18 +235,18 @@ class ActuationModelFloatingBaseThrustersTpl
 
   virtual void commands(const std::shared_ptr<Data>& data,
                         const Eigen::Ref<const VectorXs>&,
-                        const Eigen::Ref<const VectorXs>& tau) {
+                        const Eigen::Ref<const VectorXs>& tau) override {
     data->u.noalias() = data->Mtau * tau;
   }
 
 #ifndef NDEBUG
   virtual void torqueTransform(const std::shared_ptr<Data>& data,
                                const Eigen::Ref<const VectorXs>&,
-                               const Eigen::Ref<const VectorXs>&) {
+                               const Eigen::Ref<const VectorXs>&) override {
 #else
   virtual void torqueTransform(const std::shared_ptr<Data>&,
                                const Eigen::Ref<const VectorXs>&,
-                               const Eigen::Ref<const VectorXs>&) {
+                               const Eigen::Ref<const VectorXs>&) override {
 #endif
     // The torque transform has constant values which were set in createData.
     assert_pretty(MatrixXs(data->Mtau).isApprox(Mtau_), "Mtau has wrong value");
@@ -249,11 +257,23 @@ class ActuationModelFloatingBaseThrustersTpl
    *
    * @return the actuation data
    */
-  virtual std::shared_ptr<Data> createData() {
+  virtual std::shared_ptr<Data> createData() override {
     std::shared_ptr<Data> data =
         std::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
     updateData(data);
     return data;
+  }
+
+  template <typename NewScalar>
+  ActuationModelFloatingBaseThrustersTpl<NewScalar> cast() const {
+    typedef ActuationModelFloatingBaseThrustersTpl<NewScalar> ReturnType;
+    typedef StateMultibodyTpl<NewScalar> StateType;
+    typedef ThrusterTpl<NewScalar> ThrusterType;
+    std::vector<ThrusterType> thrusters = vector_cast<NewScalar>(thrusters_);
+    ReturnType ret(
+        std::static_pointer_cast<StateType>(state_->template cast<NewScalar>()),
+        thrusters);
+    return ret;
   }
 
   /**
@@ -299,7 +319,7 @@ class ActuationModelFloatingBaseThrustersTpl
     }
     // Compute the torque transform matrix from generalized torques to joint
     // torque inputs
-    Mtau_ = pseudoInverse(MatrixXs(W_thrust_));
+    Mtau_ = pseudoInverse(W_thrust_);
     S_.noalias() = W_thrust_ * Mtau_;
     update_data_ = true;
   }
@@ -308,7 +328,7 @@ class ActuationModelFloatingBaseThrustersTpl
 
   const MatrixXs& get_S() const { return S_; }
 
-  void print(std::ostream& os) const {
+  void print(std::ostream& os) const override {
     os << "ActuationModelFloatingBaseThrusters {nu=" << nu_
        << ", nthrusters=" << n_thrusters_ << ", thrusters=" << std::endl;
     for (std::size_t i = 0; i < n_thrusters_; ++i) {
@@ -335,16 +355,34 @@ class ActuationModelFloatingBaseThrustersTpl
     data->Mtau = Mtau_;
     const std::size_t nv = state_->get_nv();
     for (std::size_t k = 0; k < nv; ++k) {
-      if (fabs(S_(k, k)) < std::numeric_limits<Scalar>::epsilon()) {
-        data->tau_set[k] = false;
-      } else {
-        data->tau_set[k] = true;
-      }
+      data->tau_set[k] = if_static(S_(k, k));
     }
     update_data_ = false;
   }
+
+  // Use for floating-point types
+  template <typename Scalar>
+  typename std::enable_if<std::is_floating_point<Scalar>::value, bool>::type
+  if_static(const Scalar& condition) {
+    return (fabs(condition) < std::numeric_limits<Scalar>::epsilon()) ? false
+                                                                      : true;
+  }
+
+#ifdef CROCODDYL_WITH_CODEGEN
+  // Use for CppAD types
+  template <typename Scalar>
+  typename std::enable_if<!std::is_floating_point<Scalar>::value, bool>::type
+  if_static(const Scalar& condition) {
+    return CppAD::Value(CppAD::fabs(condition)) >=
+           CppAD::numeric_limits<Scalar>::epsilon();
+  }
+#endif
 };
 
 }  // namespace crocoddyl
+
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(crocoddyl::ThrusterTpl)
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_CLASS(
+    crocoddyl::ActuationModelFloatingBaseThrustersTpl)
 
 #endif  // CROCODDYL_MULTIBODY_ACTUATIONS_PROPELLERS_HPP_

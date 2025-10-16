@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2024, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -60,9 +60,6 @@ ContactModel3DTpl<Scalar>::ContactModel3DTpl(
 #pragma GCC diagnostic pop
 
 template <typename Scalar>
-ContactModel3DTpl<Scalar>::~ContactModel3DTpl() {}
-
-template <typename Scalar>
 void ContactModel3DTpl<Scalar>::calc(
     const std::shared_ptr<ContactDataAbstract>& data,
     const Eigen::Ref<const VectorXs>&) {
@@ -105,13 +102,8 @@ void ContactModel3DTpl<Scalar>::calcDiff(
     const std::shared_ptr<ContactDataAbstract>& data,
     const Eigen::Ref<const VectorXs>&) {
   Data* d = static_cast<Data*>(data.get());
-#if PINOCCHIO_VERSION_AT_LEAST(3, 0, 0)
   const pinocchio::JointIndex joint =
       state_->get_pinocchio()->frames[d->frame].parentJoint;
-#else
-  const pinocchio::JointIndex joint =
-      state_->get_pinocchio()->frames[d->frame].parent;
-#endif
   pinocchio::getJointAccelerationDerivatives(
       *state_->get_pinocchio().get(), *d->pinocchio, joint, pinocchio::LOCAL,
       d->v_partial_dq, d->a_partial_dq, d->a_partial_dv, d->a_partial_da);
@@ -209,6 +201,18 @@ std::shared_ptr<ContactDataAbstractTpl<Scalar> >
 ContactModel3DTpl<Scalar>::createData(pinocchio::DataTpl<Scalar>* const data) {
   return std::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this,
                                     data);
+}
+
+template <typename Scalar>
+template <typename NewScalar>
+ContactModel3DTpl<NewScalar> ContactModel3DTpl<Scalar>::cast() const {
+  typedef ContactModel3DTpl<NewScalar> ReturnType;
+  typedef StateMultibodyTpl<NewScalar> StateType;
+  ReturnType ret(
+      std::make_shared<StateType>(state_->template cast<NewScalar>()), id_,
+      xref_.template cast<NewScalar>(), type_, nu_,
+      gains_.template cast<NewScalar>());
+  return ret;
 }
 
 template <typename Scalar>

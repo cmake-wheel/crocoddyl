@@ -11,7 +11,6 @@
 #define CROCODDYL_CORE_UTILS_EXCEPTION_HPP_
 
 #include <exception>
-#include <iostream>
 #include <sstream>
 
 #define NOEXCEPT noexcept
@@ -39,10 +38,10 @@ namespace crocoddyl {
 
 class Exception : public std::exception {
  public:
-  explicit Exception(const std::string &msg, const char *file, const char *func,
+  explicit Exception(const std::string& msg, const char* file, const char* func,
                      int line);
   virtual ~Exception() NOEXCEPT;
-  virtual const char *what() const NOEXCEPT;
+  virtual const char* what() const NOEXCEPT;
 
   std::string getMessage() const;
   std::string getExtraData() const;

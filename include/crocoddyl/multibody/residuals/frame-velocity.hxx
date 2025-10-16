@@ -1,27 +1,22 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2022, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2021-2025, LAAS-CNRS, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
-
-#include <pinocchio/algorithm/frames-derivatives.hpp>
-#include <pinocchio/algorithm/frames.hpp>
-#include <pinocchio/algorithm/kinematics-derivatives.hpp>
-
-#include "crocoddyl/multibody/residuals/frame-velocity.hpp"
 
 namespace crocoddyl {
 
 template <typename Scalar>
 ResidualModelFrameVelocityTpl<Scalar>::ResidualModelFrameVelocityTpl(
     std::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
-    const Motion& velocity, const pinocchio::ReferenceFrame type,
+    const Motion& vref, const pinocchio::ReferenceFrame type,
     const std::size_t nu)
     : Base(state, 6, nu, true, true, false),
       id_(id),
-      vref_(velocity),
+      vref_(vref),
       type_(type),
       pin_model_(state->get_pinocchio()) {
   if (static_cast<pinocchio::FrameIndex>(state->get_pinocchio()->nframes) <=
@@ -35,10 +30,10 @@ ResidualModelFrameVelocityTpl<Scalar>::ResidualModelFrameVelocityTpl(
 template <typename Scalar>
 ResidualModelFrameVelocityTpl<Scalar>::ResidualModelFrameVelocityTpl(
     std::shared_ptr<StateMultibody> state, const pinocchio::FrameIndex id,
-    const Motion& velocity, const pinocchio::ReferenceFrame type)
+    const Motion& vref, const pinocchio::ReferenceFrame type)
     : Base(state, 6, true, true, false),
       id_(id),
-      vref_(velocity),
+      vref_(vref),
       type_(type),
       pin_model_(state->get_pinocchio()) {
   if (static_cast<pinocchio::FrameIndex>(state->get_pinocchio()->nframes) <=
@@ -48,9 +43,6 @@ ResidualModelFrameVelocityTpl<Scalar>::ResidualModelFrameVelocityTpl(
         << "the frame index is wrong (it does not exist in the robot)");
   }
 }
-
-template <typename Scalar>
-ResidualModelFrameVelocityTpl<Scalar>::~ResidualModelFrameVelocityTpl() {}
 
 template <typename Scalar>
 void ResidualModelFrameVelocityTpl<Scalar>::calc(
@@ -83,6 +75,18 @@ ResidualModelFrameVelocityTpl<Scalar>::createData(
     DataCollectorAbstract* const data) {
   return std::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this,
                                     data);
+}
+
+template <typename Scalar>
+template <typename NewScalar>
+ResidualModelFrameVelocityTpl<NewScalar>
+ResidualModelFrameVelocityTpl<Scalar>::cast() const {
+  typedef ResidualModelFrameVelocityTpl<NewScalar> ReturnType;
+  typedef StateMultibodyTpl<NewScalar> StateType;
+  ReturnType ret(
+      std::static_pointer_cast<StateType>(state_->template cast<NewScalar>()),
+      id_, vref_.template cast<NewScalar>(), type_, nu_);
+  return ret;
 }
 
 template <typename Scalar>

@@ -1,16 +1,13 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020-2024, University of Edinburgh, Heriot-Watt University
+// Copyright (C) 2020-2025, University of Edinburgh, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifndef CROCODDYL_CORE_CONSTRAINT_BASE_HPP_
 #define CROCODDYL_CORE_CONSTRAINT_BASE_HPP_
-
-#include <boost/make_shared.hpp>
-#include <memory>
 
 #include "crocoddyl/core/fwd.hpp"
 //
@@ -21,6 +18,13 @@
 namespace crocoddyl {
 
 enum ConstraintType { Inequality = 0, Equality, Both };
+
+class ConstraintModelBase {
+ public:
+  virtual ~ConstraintModelBase() = default;
+
+  CROCODDYL_BASE_CAST(ConstraintModelBase, ConstraintModelAbstractTpl)
+};
 
 /**
  * @brief Abstract class for constraint models
@@ -47,7 +51,7 @@ enum ConstraintType { Inequality = 0, Equality, Both };
  * \sa `calc()`, `calcDiff()`, `createData()`
  */
 template <typename _Scalar>
-class ConstraintModelAbstractTpl {
+class ConstraintModelAbstractTpl : public ConstraintModelBase {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
@@ -101,7 +105,7 @@ class ConstraintModelAbstractTpl {
   ConstraintModelAbstractTpl(std::shared_ptr<StateAbstract> state,
                              const std::size_t ng, const std::size_t nh,
                              const bool T_const = true);
-  virtual ~ConstraintModelAbstractTpl();
+  virtual ~ConstraintModelAbstractTpl() = default;
 
   /**
    * @brief Compute the constraint value
@@ -257,6 +261,8 @@ class ConstraintModelAbstractTpl {
   bool T_constraint_;  //!< Label that indicates if the constraint is imposed in
                        //!< terminal nodes as well
   VectorXs unone_;     //!< No control vector
+  ConstraintModelAbstractTpl()
+      : state_(nullptr), residual_(nullptr), nu_(0), ng_(0), nh_(0) {}
 };
 
 template <typename _Scalar>
@@ -291,7 +297,7 @@ struct ConstraintDataAbstractTpl {
     Hx.setZero();
     Hu.setZero();
   }
-  virtual ~ConstraintDataAbstractTpl() {}
+  virtual ~ConstraintDataAbstractTpl() = default;
 
   DataCollectorAbstract* shared;                   //!< Shared data
   std::shared_ptr<ResidualDataAbstract> residual;  //!< Residual data
@@ -309,5 +315,8 @@ struct ConstraintDataAbstractTpl {
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/core/constraint-base.hxx"
+
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_CLASS(crocoddyl::ConstraintModelAbstractTpl)
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(crocoddyl::ConstraintDataAbstractTpl)
 
 #endif  // CROCODDYL_CORE_CONSTRAINT_BASE_HPP_

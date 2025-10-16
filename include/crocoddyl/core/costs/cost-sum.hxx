@@ -1,15 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2023, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
-
-#include <iostream>
-
-#include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
 
@@ -48,6 +44,26 @@ void CostModelSumTpl<Scalar>::addCost(const std::string& name,
   } else if (!active) {
     nr_total_ += cost->get_activation()->get_nr();
     inactive_set_.insert(name);
+  }
+}
+
+template <typename Scalar>
+void CostModelSumTpl<Scalar>::addCost(
+    const std::shared_ptr<CostItem>& cost_item) {
+  if (cost_item->cost->get_nu() != nu_) {
+    throw_pretty(
+        cost_item->name
+        << " cost item doesn't have the same control dimension (it should be " +
+               std::to_string(nu_) + ")");
+  }
+  costs_.insert(std::make_pair(cost_item->name, cost_item));
+  if (cost_item->active) {
+    nr_ += cost_item->cost->get_activation()->get_nr();
+    nr_total_ += cost_item->cost->get_activation()->get_nr();
+    active_set_.insert(cost_item->name);
+  } else {
+    nr_total_ += cost_item->cost->get_activation()->get_nr();
+    inactive_set_.insert(cost_item->name);
   }
 }
 
@@ -243,6 +259,21 @@ std::shared_ptr<CostDataSumTpl<Scalar> > CostModelSumTpl<Scalar>::createData(
     DataCollectorAbstract* const data) {
   return std::allocate_shared<CostDataSum>(
       Eigen::aligned_allocator<CostDataSum>(), this, data);
+}
+
+template <typename Scalar>
+template <typename NewScalar>
+CostModelSumTpl<NewScalar> CostModelSumTpl<Scalar>::cast() const {
+  typedef CostModelSumTpl<NewScalar> ReturnType;
+  typedef CostItemTpl<NewScalar> CostType;
+  ReturnType ret(state_->template cast<NewScalar>(), nu_);
+  typename CostModelContainer::const_iterator it_m, end_m;
+  for (it_m = costs_.begin(), end_m = costs_.end(); it_m != end_m; ++it_m) {
+    const std::string name = it_m->first;
+    const CostType& m_i = it_m->second->template cast<NewScalar>();
+    ret.addCost(name, m_i.cost, m_i.weight, m_i.active);
+  }
+  return ret;
 }
 
 template <typename Scalar>

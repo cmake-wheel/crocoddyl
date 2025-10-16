@@ -9,8 +9,6 @@
 #ifndef CROCODDYL_CORE_DATA_MULTIBODY_HPP_
 #define CROCODDYL_CORE_DATA_MULTIBODY_HPP_
 
-#include <pinocchio/multibody/data.hpp>
-
 #include "crocoddyl/core/data-collector-base.hpp"
 #include "crocoddyl/core/data/actuation.hpp"
 #include "crocoddyl/core/data/joint.hpp"
@@ -57,5 +55,11 @@ struct DataCollectorJointActMultibodyTpl : DataCollectorActMultibodyTpl<Scalar>,
 };
 
 }  // namespace crocoddyl
+
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(crocoddyl::DataCollectorMultibodyTpl)
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(
+    crocoddyl::DataCollectorActMultibodyTpl)
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(
+    crocoddyl::DataCollectorJointActMultibodyTpl)
 
 #endif  // CROCODDYL_CORE_DATA_MULTIBODY_HPP_

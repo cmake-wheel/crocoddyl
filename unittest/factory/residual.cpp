@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2021-2024, University of Edinburgh, LAAS-CNRS,
+// Copyright (C) 2021-2025, University of Edinburgh, LAAS-CNRS,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -10,7 +10,6 @@
 #include "residual.hpp"
 
 #include "crocoddyl/core/residuals/control.hpp"
-#include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/multibody/residuals/centroidal-momentum.hpp"
 #include "crocoddyl/multibody/residuals/com-position.hpp"
 #include "crocoddyl/multibody/residuals/control-gravity.hpp"
@@ -18,7 +17,9 @@
 #include "crocoddyl/multibody/residuals/frame-rotation.hpp"
 #include "crocoddyl/multibody/residuals/frame-translation.hpp"
 #include "crocoddyl/multibody/residuals/frame-velocity.hpp"
+#ifdef CROCODDYL_WITH_PAIR_COLLISION
 #include "crocoddyl/multibody/residuals/pair-collision.hpp"
+#endif  // CROCODDYL_WITH_PAIR_COLLISION
 #include "crocoddyl/multibody/residuals/state.hpp"
 
 namespace crocoddyl {
@@ -57,9 +58,11 @@ std::ostream& operator<<(std::ostream& os, ResidualModelTypes::Type type) {
       os << "ResidualModelControlGrav";
       break;
 #ifdef PINOCCHIO_WITH_HPP_FCL
+#ifdef CROCODDYL_WITH_PAIR_COLLISION
     case ResidualModelTypes::ResidualModelPairCollision:
       os << "ResidualModelPairCollision";
       break;
+#endif  // CROCODDYL_WITH_PAIR_COLLISION
 #endif  // PINOCCHIO_WITH_HPP_FCL
     case ResidualModelTypes::NbResidualModelTypes:
       os << "NbResidualModelTypes";
@@ -85,10 +88,10 @@ std::shared_ptr<crocoddyl::ResidualModelAbstract> ResidualModelFactory::create(
   pinocchio::SE3 frame_SE3 = pinocchio::SE3::Random();
 
 #ifdef PINOCCHIO_WITH_HPP_FCL
+#ifdef CROCODDYL_WITH_PAIR_COLLISION
   pinocchio::SE3 frame_SE3_obstacle = pinocchio::SE3::Random();
   std::shared_ptr<pinocchio::GeometryModel> geometry =
       std::make_shared<pinocchio::GeometryModel>(pinocchio::GeometryModel());
-#if PINOCCHIO_VERSION_AT_LEAST(3, 0, 0)
   pinocchio::GeomIndex ig_frame =
       geometry->addGeometryObject(pinocchio::GeometryObject(
           "frame", frame_index,
@@ -102,21 +105,7 @@ std::shared_ptr<crocoddyl::ResidualModelAbstract> ResidualModelFactory::create(
               .parentJoint,
           std::make_shared<hpp::fcl::Sphere>(0), frame_SE3_obstacle));
   geometry->addCollisionPair(pinocchio::CollisionPair(ig_frame, ig_obs));
-#else
-  pinocchio::GeomIndex ig_frame =
-      geometry->addGeometryObject(pinocchio::GeometryObject(
-          "frame", frame_index,
-          state->get_pinocchio()->frames[frame_index].parent,
-          std::make_shared<hpp::fcl::Sphere>(0), frame_SE3));
-  pinocchio::GeomIndex ig_obs =
-      geometry->addGeometryObject(pinocchio::GeometryObject(
-          "obs", state->get_pinocchio()->getFrameId("universe"),
-          state->get_pinocchio()
-              ->frames[state->get_pinocchio()->getFrameId("universe")]
-              .parent,
-          std::make_shared<hpp::fcl::Sphere>(0), frame_SE3_obstacle));
-  geometry->addCollisionPair(pinocchio::CollisionPair(ig_frame, ig_obs));
-#endif
+#endif  // CROCODDYL_WITH_PAIR_COLLISION
 #endif  // PINOCCHIO_WITH_HPP_FCL
   if (nu == std::numeric_limits<std::size_t>::max()) {
     nu = state->get_nv();
@@ -161,17 +150,13 @@ std::shared_ptr<crocoddyl::ResidualModelAbstract> ResidualModelFactory::create(
           std::make_shared<crocoddyl::ResidualModelControlGrav>(state, nu);
       break;
 #ifdef PINOCCHIO_WITH_HPP_FCL
+#ifdef CROCODDYL_WITH_PAIR_COLLISION
     case ResidualModelTypes::ResidualModelPairCollision:
-#if PINOCCHIO_VERSION_AT_LEAST(3, 0, 0)
       residual = std::make_shared<crocoddyl::ResidualModelPairCollision>(
           state, nu, geometry, 0,
           state->get_pinocchio()->frames[frame_index].parentJoint);
-#else
-      residual = std::make_shared<crocoddyl::ResidualModelPairCollision>(
-          state, nu, geometry, 0,
-          state->get_pinocchio()->frames[frame_index].parent);
-#endif
       break;
+#endif  // CROCODDYL_WITH_PAIR_COLLISION
 #endif  // PINOCCHIO_WITH_HPP_FCL
     default:
       throw_pretty(__FILE__ ": Wrong ResidualModelTypes::Type given");

@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2024, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -250,13 +250,8 @@ void ContactModelMultipleTpl<Scalar>::updateForce(
         const Eigen::VectorBlock<const VectorXs, Eigen::Dynamic> force_i =
             force.segment(nc, nc_i);
         m_i->contact->updateForce(d_i, force_i);
-#if PINOCCHIO_VERSION_AT_LEAST(3, 0, 0)
         const pinocchio::JointIndex joint =
             state_->get_pinocchio()->frames[d_i->frame].parentJoint;
-#else
-        const pinocchio::JointIndex joint =
-            state_->get_pinocchio()->frames[d_i->frame].parent;
-#endif
         data->fext[joint] = d_i->fext;
       } else {
         m_i->contact->setZeroForce(d_i);
@@ -276,13 +271,8 @@ void ContactModelMultipleTpl<Scalar>::updateForce(
         const Eigen::VectorBlock<const VectorXs, Eigen::Dynamic> force_i =
             force.segment(nc, nc_i);
         m_i->contact->updateForce(d_i, force_i);
-#if PINOCCHIO_VERSION_AT_LEAST(3, 0, 0)
         const pinocchio::JointIndex joint =
             state_->get_pinocchio()->frames[d_i->frame].parentJoint;
-#else
-        const pinocchio::JointIndex joint =
-            state_->get_pinocchio()->frames[d_i->frame].parent;
-#endif
         data->fext[joint] = d_i->fext;
         nc += nc_i;
       } else {
@@ -417,6 +407,25 @@ ContactModelMultipleTpl<Scalar>::createData(
     pinocchio::DataTpl<Scalar>* const data) {
   return std::allocate_shared<ContactDataMultiple>(
       Eigen::aligned_allocator<ContactDataMultiple>(), this, data);
+}
+
+template <typename Scalar>
+template <typename NewScalar>
+ContactModelMultipleTpl<NewScalar> ContactModelMultipleTpl<Scalar>::cast()
+    const {
+  typedef ContactModelMultipleTpl<NewScalar> ReturnType;
+  typedef StateMultibodyTpl<NewScalar> StateType;
+  typedef ContactItemTpl<NewScalar> ContactType;
+  ReturnType ret(
+      std::make_shared<StateType>(state_->template cast<NewScalar>()), nu_);
+  typename ContactModelContainer::const_iterator it_m, end_m;
+  for (it_m = contacts_.begin(), end_m = contacts_.end(); it_m != end_m;
+       ++it_m) {
+    const std::string name = it_m->first;
+    const ContactType& m_i = it_m->second->template cast<NewScalar>();
+    ret.addContact(name, m_i.contact, m_i.active);
+  }
+  return ret;
 }
 
 template <typename Scalar>

@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
 //                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -10,14 +10,8 @@
 #ifndef CROCODDYL_CORE_COSTS_COST_SUM_HPP_
 #define CROCODDYL_CORE_COSTS_COST_SUM_HPP_
 
-#include <map>
-#include <set>
-#include <string>
-#include <utility>
-
 #include "crocoddyl/core/cost-base.hpp"
 #include "crocoddyl/core/fwd.hpp"
-#include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {
 
@@ -32,6 +26,14 @@ struct CostItemTpl {
   CostItemTpl(const std::string& name, std::shared_ptr<CostModelAbstract> cost,
               const Scalar weight, const bool active = true)
       : name(name), cost(cost), weight(weight), active(active) {}
+
+  template <typename NewScalar>
+  CostItemTpl<NewScalar> cast() const {
+    typedef CostItemTpl<NewScalar> ReturnType;
+    ReturnType ret(name, cost->template cast<NewScalar>(),
+                   scalar_cast<NewScalar>(weight), active);
+    return ret;
+  }
 
   /**
    * @brief Print information on the cost item
@@ -119,6 +121,13 @@ class CostModelSumTpl {
                const Scalar weight, const bool active = true);
 
   /**
+   * @brief Add a cost item
+   *
+   * @param[in] cost_item Cost item
+   */
+  void addCost(const std::shared_ptr<CostItem>& cost_item);
+
+  /**
    * @brief Remove a cost item
    *
    * @param[in] name    Cost name
@@ -195,6 +204,18 @@ class CostModelSumTpl {
    * @return the cost data
    */
   std::shared_ptr<CostDataSum> createData(DataCollectorAbstract* const data);
+
+  /**
+   * @brief Cast the cost-sum model to a different scalar type.
+   *
+   * It is useful for operations requiring different precision or scalar types.
+   *
+   * @tparam NewScalar The new scalar type to cast to.
+   * @return CostModelSumTpl<NewScalar> A cost-sum model with the
+   * new scalar type.
+   */
+  template <typename NewScalar>
+  CostModelSumTpl<NewScalar> cast() const;
 
   /**
    * @brief Return the state
@@ -418,5 +439,9 @@ struct CostDataSumTpl {
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/core/costs/cost-sum.hxx"
+
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(crocoddyl::CostItemTpl)
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_CLASS(crocoddyl::CostModelSumTpl)
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(crocoddyl::CostDataSumTpl)
 
 #endif  // CROCODDYL_CORE_COSTS_COST_SUM_HPP_

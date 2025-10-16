@@ -9,8 +9,6 @@
 #ifndef CROCODDYL_CORE_DATA_JOINT_HPP_
 #define CROCODDYL_CORE_DATA_JOINT_HPP_
 
-#include <memory>
-
 #include "crocoddyl/core/data-collector-base.hpp"
 #include "crocoddyl/core/data/actuation.hpp"
 #include "crocoddyl/core/fwd.hpp"
@@ -98,5 +96,10 @@ struct DataCollectorJointActuationTpl : DataCollectorActuationTpl<Scalar> {
 };
 
 }  // namespace crocoddyl
+
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(crocoddyl::JointDataAbstractTpl)
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(crocoddyl::DataCollectorJointTpl)
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(
+    crocoddyl::DataCollectorJointActuationTpl)
 
 #endif  // CROCODDYL_CORE_DATA_JOINT_HPP_

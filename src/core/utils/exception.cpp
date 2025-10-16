@@ -10,7 +10,7 @@
 
 namespace crocoddyl {
 
-Exception::Exception(const std::string &msg, const char *file, const char *func,
+Exception::Exception(const std::string& msg, const char* file, const char* func,
                      int line) {
   std::stringstream ss;
   ss << "In " << file << "\n";
@@ -24,7 +24,7 @@ Exception::Exception(const std::string &msg, const char *file, const char *func,
 
 Exception::~Exception() NOEXCEPT {}
 
-const char *Exception::what() const NOEXCEPT { return msg_.c_str(); }
+const char* Exception::what() const NOEXCEPT { return msg_.c_str(); }
 
 std::string Exception::getMessage() const { return exception_msg_; }
 

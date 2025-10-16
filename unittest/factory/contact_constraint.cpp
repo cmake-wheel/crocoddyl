@@ -11,7 +11,6 @@
 #include "contact.hpp"
 #include "cost.hpp"
 #include "crocoddyl/core/constraints/residual.hpp"
-#include "crocoddyl/core/utils/exception.hpp"
 #include "crocoddyl/multibody/actions/contact-fwddyn.hpp"
 #include "crocoddyl/multibody/residuals/contact-control-gravity.hpp"
 #include "crocoddyl/multibody/residuals/contact-cop-position.hpp"
@@ -25,7 +24,7 @@ namespace unittest {
 const std::vector<ContactConstraintModelTypes::Type>
     ContactConstraintModelTypes::all(ContactConstraintModelTypes::init_all());
 
-std::ostream &operator<<(std::ostream &os,
+std::ostream& operator<<(std::ostream& os,
                          ContactConstraintModelTypes::Type type) {
   switch (type) {
     case ContactConstraintModelTypes::

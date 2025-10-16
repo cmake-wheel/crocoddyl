@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2023, LAAS-CNRS, New York University,
+// Copyright (C) 2019-2025, LAAS-CNRS, New York University,
 //                          Max Planck Gesellschaft, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -9,9 +9,6 @@
 
 #ifndef CROCODDYL_CORE_NUMDIFF_ACTIVATION_HPP_
 #define CROCODDYL_CORE_NUMDIFF_ACTIVATION_HPP_
-
-#include <iostream>
-#include <vector>
 
 #include "crocoddyl/core/activation-base.hpp"
 #include "crocoddyl/core/fwd.hpp"
@@ -22,6 +19,7 @@ template <typename _Scalar>
 class ActivationModelNumDiffTpl : public ActivationModelAbstractTpl<_Scalar> {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  CROCODDYL_DERIVED_CAST(ActivationModelBase, ActivationModelNumDiffTpl)
 
   typedef _Scalar Scalar;
   typedef MathBaseTpl<Scalar> MathBase;
@@ -47,20 +45,23 @@ class ActivationModelNumDiffTpl : public ActivationModelAbstractTpl<_Scalar> {
    * @brief @copydoc Base::calc()
    */
   virtual void calc(const std::shared_ptr<ActivationDataAbstract>& data,
-                    const Eigen::Ref<const VectorXs>& r);
+                    const Eigen::Ref<const VectorXs>& r) override;
 
   /**
    * @brief @copydoc Base::calcDiff()
    */
   virtual void calcDiff(const std::shared_ptr<ActivationDataAbstract>& data,
-                        const Eigen::Ref<const VectorXs>& r);
+                        const Eigen::Ref<const VectorXs>& r) override;
 
   /**
    * @brief Create a Data object from the given model.
    *
    * @return std::shared_ptr<ActivationDataAbstract>
    */
-  virtual std::shared_ptr<ActivationDataAbstract> createData();
+  virtual std::shared_ptr<ActivationDataAbstract> createData() override;
+
+  template <typename NewScalar>
+  ActivationModelNumDiffTpl<NewScalar> cast() const;
 
   /**
    * @brief Get the model_ object
@@ -150,5 +151,8 @@ struct ActivationDataNumDiffTpl : public ActivationDataAbstractTpl<_Scalar> {
 /* --- Details -------------------------------------------------------------- */
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/core/numdiff/activation.hxx"
+
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_CLASS(crocoddyl::ActivationModelNumDiffTpl)
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(crocoddyl::ActivationDataNumDiffTpl)
 
 #endif  // CROCODDYL_CORE_NUMDIFF_ACTIVATION_HPP_

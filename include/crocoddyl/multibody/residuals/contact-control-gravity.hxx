@@ -1,15 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2020-2021, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2020-2025, LAAS-CNRS, University of Edinburgh,
+//                          Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
-
-#include <pinocchio/algorithm/rnea-derivatives.hpp>
-#include <pinocchio/algorithm/rnea.hpp>
-
-#include "crocoddyl/multibody/residuals/contact-control-gravity.hpp"
 
 namespace crocoddyl {
 
@@ -32,14 +28,10 @@ ResidualModelContactControlGravTpl<Scalar>::ResidualModelContactControlGravTpl(
       pin_model_(*state->get_pinocchio()) {}
 
 template <typename Scalar>
-ResidualModelContactControlGravTpl<
-    Scalar>::~ResidualModelContactControlGravTpl() {}
-
-template <typename Scalar>
 void ResidualModelContactControlGravTpl<Scalar>::calc(
-    const std::shared_ptr<ResidualDataAbstract> &data,
-    const Eigen::Ref<const VectorXs> &x, const Eigen::Ref<const VectorXs> &) {
-  Data *d = static_cast<Data *>(data.get());
+    const std::shared_ptr<ResidualDataAbstract>& data,
+    const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>&) {
+  Data* d = static_cast<Data*>(data.get());
 
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> q =
       x.head(state_->get_nq());
@@ -49,9 +41,9 @@ void ResidualModelContactControlGravTpl<Scalar>::calc(
 
 template <typename Scalar>
 void ResidualModelContactControlGravTpl<Scalar>::calc(
-    const std::shared_ptr<ResidualDataAbstract> &data,
-    const Eigen::Ref<const VectorXs> &x) {
-  Data *d = static_cast<Data *>(data.get());
+    const std::shared_ptr<ResidualDataAbstract>& data,
+    const Eigen::Ref<const VectorXs>& x) {
+  Data* d = static_cast<Data*>(data.get());
 
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> q =
       x.head(state_->get_nq());
@@ -60,9 +52,9 @@ void ResidualModelContactControlGravTpl<Scalar>::calc(
 
 template <typename Scalar>
 void ResidualModelContactControlGravTpl<Scalar>::calcDiff(
-    const std::shared_ptr<ResidualDataAbstract> &data,
-    const Eigen::Ref<const VectorXs> &x, const Eigen::Ref<const VectorXs> &) {
-  Data *d = static_cast<Data *>(data.get());
+    const std::shared_ptr<ResidualDataAbstract>& data,
+    const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>&) {
+  Data* d = static_cast<Data*>(data.get());
 
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> q =
       x.head(state_->get_nq());
@@ -70,15 +62,15 @@ void ResidualModelContactControlGravTpl<Scalar>::calcDiff(
       data->Rx.leftCols(state_->get_nv());
   pinocchio::computeStaticTorqueDerivatives(pin_model_, d->pinocchio, q,
                                             d->fext, Rq);
-  Rq *= -1;
+  Rq *= Scalar(-1);
   data->Ru = d->actuation->dtau_du;
 }
 
 template <typename Scalar>
 void ResidualModelContactControlGravTpl<Scalar>::calcDiff(
-    const std::shared_ptr<ResidualDataAbstract> &data,
-    const Eigen::Ref<const VectorXs> &x) {
-  Data *d = static_cast<Data *>(data.get());
+    const std::shared_ptr<ResidualDataAbstract>& data,
+    const Eigen::Ref<const VectorXs>& x) {
+  Data* d = static_cast<Data*>(data.get());
 
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> q =
       x.head(state_->get_nq());
@@ -86,19 +78,31 @@ void ResidualModelContactControlGravTpl<Scalar>::calcDiff(
       data->Rx.leftCols(state_->get_nv());
   pinocchio::computeGeneralizedGravityDerivatives(pin_model_, d->pinocchio, q,
                                                   Rq);
-  Rq *= -1;
+  Rq *= Scalar(-1);
 }
 
 template <typename Scalar>
 std::shared_ptr<ResidualDataAbstractTpl<Scalar> >
 ResidualModelContactControlGravTpl<Scalar>::createData(
-    DataCollectorAbstract *const data) {
+    DataCollectorAbstract* const data) {
   return std::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this,
                                     data);
 }
 
 template <typename Scalar>
-void ResidualModelContactControlGravTpl<Scalar>::print(std::ostream &os) const {
+template <typename NewScalar>
+ResidualModelContactControlGravTpl<NewScalar>
+ResidualModelContactControlGravTpl<Scalar>::cast() const {
+  typedef ResidualModelContactControlGravTpl<NewScalar> ReturnType;
+  typedef StateMultibodyTpl<NewScalar> StateType;
+  ReturnType ret(
+      std::static_pointer_cast<StateType>(state_->template cast<NewScalar>()),
+      nu_);
+  return ret;
+}
+
+template <typename Scalar>
+void ResidualModelContactControlGravTpl<Scalar>::print(std::ostream& os) const {
   os << "ResidualModelContactControlGrav";
 }
 

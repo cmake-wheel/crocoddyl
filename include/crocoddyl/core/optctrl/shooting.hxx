@@ -1,16 +1,12 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2019-2022, LAAS-CNRS, University of Edinburgh,
+// Copyright (C) 2019-2025, LAAS-CNRS, University of Edinburgh,
 //                          University of Oxford, Heriot-Watt University
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include <iostream>
-#ifdef CROCODDYL_WITH_MULTITHREADING
-#include <omp.h>
-#endif  // CROCODDYL_WITH_MULTITHREADING
 #include "crocoddyl/core/utils/stop-watch.hpp"
 
 namespace crocoddyl {
@@ -27,16 +23,8 @@ ShootingProblemTpl<Scalar>::ShootingProblemTpl(
       running_models_(running_models),
       nx_(running_models[0]->get_state()->get_nx()),
       ndx_(running_models[0]->get_state()->get_ndx()),
-      nu_max_(running_models[0]->get_nu()),
       nthreads_(1),
       is_updated_(false) {
-  for (std::size_t i = 1; i < T_; ++i) {
-    const std::shared_ptr<ActionModelAbstract>& model = running_models_[i];
-    const std::size_t nu = model->get_nu();
-    if (nu_max_ < nu) {
-      nu_max_ = nu;
-    }
-  }
   if (static_cast<std::size_t>(x0.size()) != nx_) {
     throw_pretty(
         "Invalid argument: " << "x0 has wrong dimension (it should be " +
@@ -90,15 +78,7 @@ ShootingProblemTpl<Scalar>::ShootingProblemTpl(
       running_datas_(running_datas),
       nx_(running_models[0]->get_state()->get_nx()),
       ndx_(running_models[0]->get_state()->get_ndx()),
-      nu_max_(running_models[0]->get_nu()),
       nthreads_(1) {
-  for (std::size_t i = 1; i < T_; ++i) {
-    const std::shared_ptr<ActionModelAbstract>& model = running_models_[i];
-    const std::size_t nu = model->get_nu();
-    if (nu_max_ < nu) {
-      nu_max_ = nu;
-    }
-  }
   if (static_cast<std::size_t>(x0.size()) != nx_) {
     throw_pretty(
         "Invalid argument: " << "x0 has wrong dimension (it should be " +
@@ -154,8 +134,7 @@ ShootingProblemTpl<Scalar>::ShootingProblemTpl(
       running_models_(problem.get_runningModels()),
       running_datas_(problem.get_runningDatas()),
       nx_(problem.get_nx()),
-      ndx_(problem.get_ndx()),
-      nu_max_(problem.get_nu_max()) {}
+      ndx_(problem.get_ndx()) {}
 
 template <typename Scalar>
 ShootingProblemTpl<Scalar>::~ShootingProblemTpl() {}
@@ -219,14 +198,22 @@ Scalar ShootingProblemTpl<Scalar>::calcDiff(const std::vector<VectorXs>& xs,
   terminal_model_->calcDiff(terminal_data_, xs.back());
 
   cost_ = Scalar(0.);
+  // Apply SIMD only for floating-point types
+  if (std::is_floating_point<Scalar>::value) {
 #ifdef CROCODDYL_WITH_MULTITHREADING
 #pragma omp simd reduction(+ : cost_)
 #endif
-  for (std::size_t i = 0; i < T_; ++i) {
-    cost_ += running_datas_[i]->cost;
+    for (std::size_t i = 0; i < T_; ++i) {
+      cost_ += running_datas_[i]->cost;
+    }
+    cost_ += terminal_data_->cost;
+  } else {  // For non-floating-point types (e.g., CppAD types), use the normal
+            // loop without SIMD
+    for (std::size_t i = 0; i < T_; ++i) {
+      cost_ += running_datas_[i]->cost;
+    }
+    cost_ += terminal_data_->cost;
   }
-  cost_ += terminal_data_->cost;
-
   STOP_PROFILER("ShootingProblem::calcDiff");
   return cost_;
 }
@@ -404,6 +391,17 @@ void ShootingProblemTpl<Scalar>::updateModel(
 }
 
 template <typename Scalar>
+template <typename NewScalar>
+ShootingProblemTpl<NewScalar> ShootingProblemTpl<Scalar>::cast() const {
+  typedef ShootingProblemTpl<NewScalar> ReturnType;
+  ReturnType ret(x0_.template cast<NewScalar>(),
+                 vector_cast<NewScalar>(running_models_),
+                 terminal_model_->template cast<NewScalar>());
+  ret.set_nthreads((int)nthreads_);
+  return ret;
+}
+
+template <typename Scalar>
 std::size_t ShootingProblemTpl<Scalar>::get_T() const {
   return T_;
 }
@@ -462,7 +460,7 @@ template <typename Scalar>
 void ShootingProblemTpl<Scalar>::set_runningModels(
     const std::vector<std::shared_ptr<ActionModelAbstract> >& models) {
   for (std::size_t i = 0; i < T_; ++i) {
-    const std::shared_ptr<ActionModelAbstract>& model = running_models_[i];
+    const std::shared_ptr<ActionModelAbstract>& model = models[i];
     if (model->get_state()->get_nx() != nx_) {
       throw_pretty("Invalid argument: "
                    << "nx in " << i
@@ -480,6 +478,7 @@ void ShootingProblemTpl<Scalar>::set_runningModels(
   running_datas_.clear();
   for (std::size_t i = 0; i < T_; ++i) {
     const std::shared_ptr<ActionModelAbstract>& model = running_models_[i];
+    running_models_.push_back(model);
     running_datas_.push_back(model->createData());
   }
 }
@@ -532,11 +531,6 @@ std::size_t ShootingProblemTpl<Scalar>::get_nx() const {
 template <typename Scalar>
 std::size_t ShootingProblemTpl<Scalar>::get_ndx() const {
   return ndx_;
-}
-
-template <typename Scalar>
-std::size_t ShootingProblemTpl<Scalar>::get_nu_max() const {
-  return nu_max_;
 }
 
 template <typename Scalar>

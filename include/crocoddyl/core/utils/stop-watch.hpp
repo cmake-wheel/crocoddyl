@@ -157,11 +157,11 @@ class Stopwatch {
 
  public:
   struct Watcher {
-    Stopwatch &w;
+    Stopwatch& w;
     std::string n;
-    PerformanceData *p;
+    PerformanceData* p;
 
-    Watcher(Stopwatch &_w, std::string _n, PerformanceData *_p)
+    Watcher(Stopwatch& _w, std::string _n, PerformanceData* _p)
         : w(_w), n(_n), p(_p) {}
     inline void start() {
       if (w.profiler_active) _start();
@@ -197,49 +197,49 @@ class Stopwatch {
   void set_mode(StopwatchMode mode);
 
   /** @brief create a Start the stopwatch related to a certain piece of code */
-  Watcher watcher(const std::string &perf_name);
+  Watcher watcher(const std::string& perf_name);
 
   /** @brief Start the stopwatch related to a certain piece of code */
-  void start(const std::string &perf_name);
+  void start(const std::string& perf_name);
 
   /** @brief Stops the stopwatch related to a certain piece of code */
-  void stop(const std::string &perf_name);
+  void stop(const std::string& perf_name);
 
   /** @brief Stops the stopwatch related to a certain piece of code */
-  void pause(const std::string &perf_name);
+  void pause(const std::string& perf_name);
 
   /** @brief Reset a certain performance record */
-  void reset(const std::string &perf_name);
+  void reset(const std::string& perf_name);
 
   /** @brief Resets all the performance records */
   void reset_all();
 
   /** @brief Dump the data of a certain performance record */
-  void report(const std::string &perf_name, int precision = 2,
-              std::ostream &output = std::cout);
+  void report(const std::string& perf_name, int precision = 2,
+              std::ostream& output = std::cout);
 
   /** @brief Dump the data of all the performance records */
-  void report_all(int precision = 2, std::ostream &output = std::cout);
+  void report_all(int precision = 2, std::ostream& output = std::cout);
 
   /** @brief Returns total execution time of a certain performance */
-  long double get_total_time(const std::string &perf_name);
+  long double get_total_time(const std::string& perf_name);
 
   /** @brief Returns average execution time of a certain performance */
-  long double get_average_time(const std::string &perf_name);
+  long double get_average_time(const std::string& perf_name);
 
   /** @brief Returns minimum execution time of a certain performance */
-  long double get_min_time(const std::string &perf_name);
+  long double get_min_time(const std::string& perf_name);
 
   /** @brief Returns maximum execution time of a certain performance */
-  long double get_max_time(const std::string &perf_name);
+  long double get_max_time(const std::string& perf_name);
 
   /** @brief Return last measurement of a certain performance */
-  long double get_last_time(const std::string &perf_name);
+  long double get_last_time(const std::string& perf_name);
 
   /** @brief Return the time since the start of the last measurement of a given
       performance.
   */
-  long double get_time_so_far(const std::string &perf_name);
+  long double get_time_so_far(const std::string& perf_name);
 
   /** @brief Turn off clock, all the Stopwatch::* methods return without doing
         anything after this method is called. */
@@ -273,18 +273,18 @@ class Stopwatch {
     int stops;    //!< How many cycles have been this stopwatch executed?
   };
 
-  PerformanceData &get_or_create_perf(const std::string &perf_name);
+  PerformanceData& get_or_create_perf(const std::string& perf_name);
 
-  void stop_perf(PerformanceData &perf_info, long double clock_end);
+  void stop_perf(PerformanceData& perf_info, long double clock_end);
 
   bool active;         //!< Flag to hold the clock's status
   StopwatchMode mode;  //!< Time taking mode
-  std::map<std::string, PerformanceData>
-      *records_of;       //!< Dynamic collection of performance data
+  std::map<std::string, PerformanceData>*
+      records_of;        //!< Dynamic collection of performance data
   bool profiler_active;  //!< Indicates if the profiler is enabled
 };
 
-Stopwatch &getProfiler();
+Stopwatch& getProfiler();
 
 }  // namespace crocoddyl
 

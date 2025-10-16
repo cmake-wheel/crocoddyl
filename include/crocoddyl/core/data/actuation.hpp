@@ -9,8 +9,6 @@
 #ifndef CROCODDYL_CORE_DATA_ACTUATION_HPP_
 #define CROCODDYL_CORE_DATA_ACTUATION_HPP_
 
-#include <memory>
-
 #include "crocoddyl/core/actuation-base.hpp"
 #include "crocoddyl/core/data-collector-base.hpp"
 #include "crocoddyl/core/fwd.hpp"
@@ -30,5 +28,7 @@ struct DataCollectorActuationTpl : virtual DataCollectorAbstractTpl<Scalar> {
 };
 
 }  // namespace crocoddyl
+
+CROCODDYL_DECLARE_EXTERN_TEMPLATE_STRUCT(crocoddyl::DataCollectorActuationTpl)
 
 #endif  // CROCODDYL_CORE_DATA_ACTUATION_HPP_
