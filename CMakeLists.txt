@@ -225,7 +225,7 @@ if(BUILD_WITH_IPOPT AND IPOPT_FOUND)
   link_directories(${IPOPT_LIBRARY_DIRS})
 endif()
 
-set(BOOST_REQUIRED_COMPONENTS filesystem serialization system)
+set(BOOST_REQUIRED_COMPONENTS filesystem serialization)
 set(BOOST_BUILD_COMPONENTS unit_test_framework)
 set_boost_default_options()
 export_boost_default_options()
@@ -287,8 +287,7 @@ if(UNIX AND NOT BUILD_STANDALONE_PYTHON_INTERFACE)
   target_include_directories(${PROJECT_NAME}
                              PUBLIC $<INSTALL_INTERFACE:include>)
   target_link_libraries(${PROJECT_NAME} pinocchio::pinocchio)
-  target_link_libraries(${PROJECT_NAME} Boost::filesystem Boost::system
-                        Boost::serialization)
+  target_link_libraries(${PROJECT_NAME} Boost::filesystem Boost::serialization)
   target_compile_definitions(
     ${PROJECT_NAME} PUBLIC PINOCCHIO_ENABLE_COMPATIBILITY_WITH_VERSION_2)
   set_target_properties(${PROJECT_NAME} PROPERTIES VERSION ${PROJECT_VERSION})
