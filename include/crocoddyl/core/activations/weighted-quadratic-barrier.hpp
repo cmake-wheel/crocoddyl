@@ -46,14 +46,14 @@ class ActivationModelWeightedQuadraticBarrierTpl
           "Invalid argument: " << "r has wrong dimension (it should be " +
                                       std::to_string(nr_) + ")");
     }
-    std::shared_ptr<Data> d = std::static_pointer_cast<Data>(data);
+    Data* d = static_cast<Data*>(data.get());
 
-    d->rlb_min_ = (r - bounds_.lb).array().min(Scalar(0.));
-    d->rub_max_ = (r - bounds_.ub).array().max(Scalar(0.));
-    d->rlb_min_.array() *= weights_.array();
-    d->rub_max_.array() *= weights_.array();
-    data->a_value = Scalar(0.5) * d->rlb_min_.matrix().squaredNorm() +
-                    Scalar(0.5) * d->rub_max_.matrix().squaredNorm();
+    d->rlb_min = (r - bounds_.lb).array().min(Scalar(0.));
+    d->rub_max = (r - bounds_.ub).array().max(Scalar(0.));
+    d->rlb_min.array() *= weights_.array();
+    d->rub_max.array() *= weights_.array();
+    data->a_value = Scalar(0.5) * d->rlb_min.matrix().squaredNorm() +
+                    Scalar(0.5) * d->rub_max.matrix().squaredNorm();
   };
 
   virtual void calcDiff(const std::shared_ptr<ActivationDataAbstract>& data,
@@ -64,7 +64,7 @@ class ActivationModelWeightedQuadraticBarrierTpl
                                       std::to_string(nr_) + ")");
     }
     std::shared_ptr<Data> d = std::static_pointer_cast<Data>(data);
-    data->Ar = (d->rlb_min_ + d->rub_max_).matrix();
+    data->Ar = (d->rlb_min + d->rub_max).matrix();
     data->Ar.array() *= weights_.array();
 
     using pinocchio::internal::if_then_else;

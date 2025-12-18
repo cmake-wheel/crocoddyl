@@ -97,7 +97,15 @@ struct ActuationModelAbstractVisitor
             "state",
             bp::make_function(&Model::get_state,
                               bp::return_value_policy<bp::return_by_value>()),
-            "state");
+            "state")
+        .add_property("u_lb",
+                      bp::make_function(&Model::get_u_lb,
+                                        bp::return_internal_reference<>()),
+                      &Model::set_u_lb, "lower actuation limits")
+        .add_property("u_ub",
+                      bp::make_function(&Model::get_u_ub,
+                                        bp::return_internal_reference<>()),
+                      &Model::set_u_ub, "upper actuation limits");
   }
 };
 

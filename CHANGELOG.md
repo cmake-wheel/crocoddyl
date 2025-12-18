@@ -6,7 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
-## [3.1.0] - 1980-01-01
+## [3.2.0] - 2025-12-09
+
+* Introduced the actuation limits to handle thrusters and general action models in https://github.com/loco-3d/crocoddyl/pull/1455
+* Introduced safe difference and integration functions for states in https://github.com/loco-3d/crocoddyl/pull/1448
+* ROS: jrl_cmakemodules dependency + kilted CI in https://github.com/loco-3d/crocoddyl/pull/1441
+
+## [3.1.0] - 2025-10-02
 
 * Allow use of BUILD_STANDALONE_PYTHON_INTERFACE CMake option in https://github.com/loco-3d/crocoddyl/pull/1434
 * Migrated notebooks to Meshcat in https://github.com/loco-3d/crocoddyl/pull/1404
@@ -341,7 +347,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 Initial release
 
-[Unreleased]: https://github.com/loco-3d/crocoddyl/compare/v3.1.0...HEAD
+[Unreleased]: https://github.com/loco-3d/crocoddyl/compare/v3.2.0...HEAD
+[3.2.0]: https://github.com/loco-3d/crocoddyl/compare/v3.1.0...v3.2.0
 [3.1.0]: https://github.com/loco-3d/crocoddyl/compare/v3.0.1...v3.1.0
 [3.0.1]: https://github.com/loco-3d/crocoddyl/compare/v3.0.0...v3.0.1
 [3.0.0]: https://github.com/loco-3d/crocoddyl/compare/v2.2.0...v3.0.0

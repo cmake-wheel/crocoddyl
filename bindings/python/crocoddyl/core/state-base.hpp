@@ -53,14 +53,12 @@ class StateAbstractTpl_wrap : public StateAbstractTpl<Scalar>,
   VectorXs diff_wrap(const Eigen::Ref<const VectorXs>& x0,
                      const Eigen::Ref<const VectorXs>& x1) const {
     if (static_cast<std::size_t>(x0.size()) != nx_) {
-      throw_pretty(
-          "Invalid argument: " << "x0 has wrong dimension (it should be " +
-                                      std::to_string(nx_) + ")");
+      throw_pretty("Invalid argument: x0 has wrong dimension (it should be " +
+                   std::to_string(nx_) + ")");
     }
     if (static_cast<std::size_t>(x1.size()) != nx_) {
-      throw_pretty(
-          "Invalid argument: " << "x1 has wrong dimension (it should be " +
-                                      std::to_string(nx_) + ")");
+      throw_pretty("Invalid argument: x1 has wrong dimension (it should be " +
+                   std::to_string(nx_) + ")");
     }
     return bp::call<VectorXs>(this->get_override("diff").ptr(), (VectorXs)x0,
                               (VectorXs)x1);
@@ -75,14 +73,12 @@ class StateAbstractTpl_wrap : public StateAbstractTpl<Scalar>,
   VectorXs integrate_wrap(const Eigen::Ref<const VectorXs>& x,
                           const Eigen::Ref<const VectorXs>& dx) const {
     if (static_cast<std::size_t>(x.size()) != nx_) {
-      throw_pretty(
-          "Invalid argument: " << "x has wrong dimension (it should be " +
-                                      std::to_string(nx_) + ")");
+      throw_pretty("Invalid argument: x has wrong dimension (it should be " +
+                   std::to_string(nx_) + ")");
     }
     if (static_cast<std::size_t>(dx.size()) != ndx_) {
-      throw_pretty(
-          "Invalid argument: " << "dx has wrong dimension (it should be " +
-                                      std::to_string(ndx_) + ")");
+      throw_pretty("Invalid argument: dx has wrong dimension (it should be " +
+                   std::to_string(ndx_) + ")");
     }
     return bp::call<VectorXs>(this->get_override("integrate").ptr(),
                               (VectorXs)x, (VectorXs)dx);
@@ -92,6 +88,79 @@ class StateAbstractTpl_wrap : public StateAbstractTpl<Scalar>,
                  const Eigen::Ref<const VectorXs>& dx,
                  Eigen::Ref<VectorXs> x1out) const override {
     x1out = integrate_wrap(x, dx);
+  }
+
+  VectorXs safe_diff_wrap(const Eigen::Ref<const VectorXs>& x0,
+                          const Eigen::Ref<const VectorXs>& x1) const {
+    VectorXs dxout(ndx_);
+    State::safe_diff(x0, x1, dxout);
+    return dxout;
+  }
+
+  void safe_diff(const Eigen::Ref<const VectorXs>& x0,
+                 const Eigen::Ref<const VectorXs>& x1,
+                 Eigen::Ref<VectorXs> dxout) const override {
+    if (static_cast<std::size_t>(x0.size()) != nx_) {
+      throw_pretty("Invalid argument: x0 has wrong dimension (it should be " +
+                   std::to_string(nx_) + ")");
+    }
+    if (static_cast<std::size_t>(x1.size()) != nx_) {
+      throw_pretty("Invalid argument: x1 has wrong dimension (it should be " +
+                   std::to_string(nx_) + ")");
+    }
+    if (boost::python::override safe_diff = this->get_override("safe_diff")) {
+      dxout = bp::call<VectorXs>(this->get_override("safe_diff").ptr(),
+                                 (VectorXs)x0, (VectorXs)x1);
+      if (static_cast<std::size_t>(dxout.size()) != ndx_) {
+        throw_pretty(
+            "Invalid argument: dxout has wrong dimension (it should be " +
+            std::to_string(ndx_) + ")");
+      }
+    }
+    State::safe_diff(x0, x1, dxout);
+  }
+
+  void default_safe_diff(const Eigen::Ref<const VectorXs>& x0,
+                         const Eigen::Ref<const VectorXs>& x1,
+                         Eigen::Ref<VectorXs> dxout) const {
+    safe_diff(x0, x1, dxout);
+  }
+
+  VectorXs safe_integrate_wrap(const Eigen::Ref<const VectorXs>& x,
+                               const Eigen::Ref<const VectorXs>& dx) const {
+    VectorXs xout(nx_);
+    State::safe_integrate(x, dx, xout);
+    return xout;
+  }
+
+  void safe_integrate(const Eigen::Ref<const VectorXs>& x,
+                      const Eigen::Ref<const VectorXs>& dx,
+                      Eigen::Ref<VectorXs> xout) const override {
+    if (static_cast<std::size_t>(x.size()) != nx_) {
+      throw_pretty("Invalid argument: x has wrong dimension (it should be " +
+                   std::to_string(nx_) + ")");
+    }
+    if (static_cast<std::size_t>(dx.size()) != ndx_) {
+      throw_pretty("Invalid argument: dx has wrong dimension (it should be " +
+                   std::to_string(ndx_) + ")");
+    }
+    if (boost::python::override safe_integrate =
+            this->get_override("safe_integrate")) {
+      xout = bp::call<VectorXs>(this->get_override("safe_integrate").ptr(),
+                                (VectorXs)x, (VectorXs)dx);
+      if (static_cast<std::size_t>(xout.size()) != nx_) {
+        throw_pretty(
+            "Invalid argument: xout has wrong dimension (it should be " +
+            std::to_string(nx_) + ")");
+      }
+    }
+    State::safe_integrate(x, dx, xout);
+  }
+
+  void default_safe_integrate(const Eigen::Ref<const VectorXs>& x,
+                              const Eigen::Ref<const VectorXs>& dx,
+                              Eigen::Ref<VectorXs> xout) const {
+    State::safe_integrate(x, dx, xout);
   }
 
   void Jdiff(const Eigen::Ref<const VectorXs>& x0,
@@ -128,14 +197,12 @@ class StateAbstractTpl_wrap : public StateAbstractTpl<Scalar>,
         is_a_Jcomponent(firstsecond),
         ("firstsecond must be one of the Jcomponent {both, first, second}"));
     if (static_cast<std::size_t>(x0.size()) != nx_) {
-      throw_pretty(
-          "Invalid argument: " << "x0 has wrong dimension (it should be " +
-                                      std::to_string(nx_) + ")");
+      throw_pretty("Invalid argument: x0 has wrong dimension (it should be " +
+                   std::to_string(nx_) + ")");
     }
     if (static_cast<std::size_t>(x1.size()) != nx_) {
-      throw_pretty(
-          "Invalid argument: " << "x1 has wrong dimension (it should be " +
-                                      std::to_string(nx_) + ")");
+      throw_pretty("Invalid argument: x1 has wrong dimension (it should be " +
+                   std::to_string(nx_) + ")");
     }
 
     bp::list Jacs;
@@ -239,14 +306,12 @@ class StateAbstractTpl_wrap : public StateAbstractTpl<Scalar>,
         is_a_Jcomponent(firstsecond),
         ("firstsecond must be one of the Jcomponent {both, first, second}"));
     if (static_cast<std::size_t>(x.size()) != nx_) {
-      throw_pretty(
-          "Invalid argument: " << "x has wrong dimension (it should be " +
-                                      std::to_string(nx_) + ")");
+      throw_pretty("Invalid argument: x has wrong dimension (it should be " +
+                   std::to_string(nx_) + ")");
     }
     if (static_cast<std::size_t>(dx.size()) != ndx_) {
-      throw_pretty(
-          "Invalid argument: " << "dx has wrong dimension (it should be " +
-                                      std::to_string(ndx_) + ")");
+      throw_pretty("Invalid argument: dx has wrong dimension (it should be " +
+                   std::to_string(ndx_) + ")");
     }
 
     bp::list Jacs;
@@ -292,14 +357,12 @@ class StateAbstractTpl_wrap : public StateAbstractTpl<Scalar>,
         is_a_Jcomponent(firstsecond),
         ("firstsecond must be one of the Jcomponent {both, first, second}"));
     if (static_cast<std::size_t>(x.size()) != nx_) {
-      throw_pretty(
-          "Invalid argument: " << "x has wrong dimension (it should be " +
-                                      std::to_string(nx_) + ")");
+      throw_pretty("Invalid argument: x has wrong dimension (it should be " +
+                   std::to_string(nx_) + ")");
     }
     if (static_cast<std::size_t>(dx.size()) != ndx_) {
-      throw_pretty(
-          "Invalid argument: " << "dx has wrong dimension (it should be " +
-                                      std::to_string(ndx_) + ")");
+      throw_pretty("Invalid argument: dx has wrong dimension (it should be " +
+                   std::to_string(ndx_) + ")");
     }
     return bp::call<MatrixXs>(this->get_override("JintegrateTransport").ptr(),
                               (VectorXs)x, (VectorXs)dx, (MatrixXs)Jin,

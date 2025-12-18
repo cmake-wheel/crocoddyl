@@ -33,8 +33,8 @@ DifferentialActionModelFreeFwdDynamicsTpl<Scalar>::
         << "Costs doesn't have the same control dimension (it should be " +
                std::to_string(nu_) + ")");
   }
-  Base::set_u_lb(Scalar(-1.) * pinocchio_->effortLimit.tail(nu_));
-  Base::set_u_ub(Scalar(+1.) * pinocchio_->effortLimit.tail(nu_));
+  Base::u_lb_ = actuation_->get_u_lb();
+  Base::u_ub_ = actuation_->get_u_ub();
 }
 
 template <typename Scalar>

@@ -141,10 +141,10 @@ class ActivationModelQuadraticBarrierTpl
 
     std::shared_ptr<Data> d = std::static_pointer_cast<Data>(data);
 
-    d->rlb_min_ = (r - bounds_.lb).array().min(Scalar(0.));
-    d->rub_max_ = (r - bounds_.ub).array().max(Scalar(0.));
-    data->a_value = Scalar(0.5) * d->rlb_min_.matrix().squaredNorm() +
-                    Scalar(0.5) * d->rub_max_.matrix().squaredNorm();
+    d->rlb_min = (r - bounds_.lb).array().min(Scalar(0.));
+    d->rub_max = (r - bounds_.ub).array().max(Scalar(0.));
+    data->a_value = Scalar(0.5) * d->rlb_min.matrix().squaredNorm() +
+                    Scalar(0.5) * d->rub_max.matrix().squaredNorm();
   };
 
   virtual void calcDiff(const std::shared_ptr<ActivationDataAbstract>& data,
@@ -156,7 +156,7 @@ class ActivationModelQuadraticBarrierTpl
     }
 
     std::shared_ptr<Data> d = std::static_pointer_cast<Data>(data);
-    data->Ar = (d->rlb_min_ + d->rub_max_).matrix();
+    data->Ar = (d->rlb_min + d->rub_max).matrix();
 
     using pinocchio::internal::if_then_else;
     for (Eigen::Index i = 0; i < data->Arr.cols(); i++) {
@@ -212,14 +212,14 @@ struct ActivationDataQuadraticBarrierTpl
   template <typename Activation>
   explicit ActivationDataQuadraticBarrierTpl(Activation* const activation)
       : Base(activation),
-        rlb_min_(activation->get_nr()),
-        rub_max_(activation->get_nr()) {
-    rlb_min_.setZero();
-    rub_max_.setZero();
+        rlb_min(activation->get_nr()),
+        rub_max(activation->get_nr()) {
+    rlb_min.setZero();
+    rub_max.setZero();
   }
 
-  ArrayXs rlb_min_;
-  ArrayXs rub_max_;
+  ArrayXs rlb_min;
+  ArrayXs rub_max;
 
   using Base::a_value;
   using Base::Ar;

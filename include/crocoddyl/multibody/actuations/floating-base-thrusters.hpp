@@ -178,11 +178,22 @@ class ActuationModelFloatingBaseThrustersTpl
           << "the first joint has to be a root one (e.g., free-flyer joint)");
     }
     // Update the joint actuation part
+    const std::size_t nv_f =
+        state->get_pinocchio()
+            ->joints[(state->get_pinocchio()->existJointName("root_joint")
+                          ? state->get_pinocchio()->getJointId("root_joint")
+                          : 0)]
+            .nv();
     W_thrust_.setZero();
     if (nu_ > n_thrusters_) {
       W_thrust_.bottomRightCorner(nu_ - n_thrusters_, nu_ - n_thrusters_)
           .diagonal()
           .setOnes();
+      Base::u_lb_.tail(nu_ - n_thrusters_) =
+          Scalar(-1.) *
+          state->get_pinocchio()->effortLimit.segment(nv_f, nu_ - n_thrusters_);
+      Base::u_ub_.tail(nu_ - n_thrusters_) =
+          state->get_pinocchio()->effortLimit.segment(nv_f, nu_ - n_thrusters_);
     }
     // Update the floating base actuation part
     set_thrusters(thrusters_);
@@ -316,6 +327,8 @@ class ActuationModelFloatingBaseThrustersTpl
           W_thrust_.template middleRows<3>(3).col(i) -= p.ctorque * f_z;
           break;
       }
+      Base::u_lb_(i) = p.min_thrust;
+      Base::u_ub_(i) = p.max_thrust;
     }
     // Compute the torque transform matrix from generalized torques to joint
     // torque inputs

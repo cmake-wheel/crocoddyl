@@ -156,6 +156,26 @@ class ActuationModelAbstractTpl : public ActuationModelBase {
   const std::shared_ptr<StateAbstract>& get_state() const;
 
   /**
+   * @brief Return the actuation lower bound
+   */
+  const VectorXs& get_u_lb() const;
+
+  /**
+   * @brief Return the actuation upper bound
+   */
+  const VectorXs& get_u_ub() const;
+
+  /**
+   * @brief Modify the actuation lower bounds
+   */
+  void set_u_lb(const VectorXs& u_lb);
+
+  /**
+   * @brief Modify the actuation upper bounds
+   */
+  void set_u_ub(const VectorXs& u_ub);
+
+  /**
    * @brief Print information on the actuation model
    */
   template <class Scalar>
@@ -172,6 +192,8 @@ class ActuationModelAbstractTpl : public ActuationModelBase {
  protected:
   std::size_t nu_;                        //!< Dimension of joint torque inputs
   std::shared_ptr<StateAbstract> state_;  //!< Model of the state
+  VectorXs u_lb_;                         //!< Lower actuation limits
+  VectorXs u_ub_;                         //!< Upper actuation limits
   ActuationModelAbstractTpl() : nu_(0), state_(nullptr) {};
 };
 

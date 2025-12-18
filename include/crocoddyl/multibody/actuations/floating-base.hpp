@@ -60,7 +60,10 @@ class ActuationModelFloatingBaseTpl
                          state->get_pinocchio()->existJointName("root_joint")
                              ? state->get_pinocchio()->getJointId("root_joint")
                              : 0)]
-                     .nv()) {};
+                     .nv()) {
+    Base::u_lb_ = Scalar(-1.) * state->get_pinocchio()->effortLimit.tail(nu_);
+    Base::u_ub_ = state->get_pinocchio()->effortLimit.tail(nu_);
+  };
   virtual ~ActuationModelFloatingBaseTpl() = default;
 
   /**

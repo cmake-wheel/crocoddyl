@@ -13,6 +13,7 @@
 #include "crocoddyl/core/actuation-base.hpp"
 #include "crocoddyl/core/state-base.hpp"
 #include "crocoddyl/multibody/fwd.hpp"
+#include "crocoddyl/multibody/states/multibody.hpp"
 
 namespace crocoddyl {
 
@@ -47,7 +48,14 @@ class ActuationModelFullTpl : public ActuationModelAbstractTpl<_Scalar> {
    * @param[in] state  State of the dynamical system
    */
   explicit ActuationModelFullTpl(std::shared_ptr<StateAbstract> state)
-      : Base(state, state->get_nv()) {};
+      : Base(state, state->get_nv()) {
+    StateMultibodyTpl<Scalar>* s =
+        dynamic_cast<StateMultibodyTpl<Scalar>*>(state.get());
+    if (s != NULL) {
+      Base::u_lb_ = Scalar(-1.) * s->get_pinocchio()->effortLimit;
+      Base::u_ub_ = s->get_pinocchio()->effortLimit;
+    }
+  };
   virtual ~ActuationModelFullTpl() = default;
 
   /**
