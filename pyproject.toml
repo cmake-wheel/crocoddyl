@@ -5,7 +5,7 @@ requires = [
   "cmeel[build]",
   "example-robot-data-loaders[build]",
   "ipykernel",
-  "libcrocoddyl == 3.1.0",
+  "libcrocoddyl == 3.2.0",
   "matplotlib",
   "nbconvert",
   "nbformat",
@@ -16,7 +16,7 @@ requires = [
 dependencies = [
   "cmeel-boost ~= 1.89.0",
   "example-robot-data-loaders",
-  "libcrocoddyl == 3.1.0"
+  "libcrocoddyl == 3.2.0"
 ]
 description = "A fast and flexible implementation of Rigid Body Dynamics algorithms and their analytical derivatives"
 license = "BSD-3-Clause"
