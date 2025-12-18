@@ -9,6 +9,7 @@
 #ifndef CROCODDYL_UTILS_CONVERSIONS_HPP_
 #define CROCODDYL_UTILS_CONVERSIONS_HPP_
 
+#include <memory>
 #include <vector>
 
 #ifdef CROCODDYL_WITH_CODEGEN
