@@ -29,6 +29,7 @@ homepage = "https://github.com/cmake-wheel/crocoddyl"
 upstream = "https://github.com/loco-3d/crocoddyl"
 
 [tool.cmeel]
+build-number = 1
 configure-args = [
   "-DBUILD_PYTHON_INTERFACE=ON",
   "-DBUILD_STANDALONE_PYTHON_INTERFACE=ON"
