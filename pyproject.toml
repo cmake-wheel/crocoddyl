@@ -1,11 +1,11 @@
 [build-system]
 build-backend = "cmeel"
 requires = [
-  "cmeel-boost ~= 1.89.0",
+  "cmeel-boost ~= 1.90.0",
   "cmeel[build]",
   "example-robot-data-loaders[build]",
   "ipykernel",
-  "libcrocoddyl == 3.2.0",
+  "libcrocoddyl == 3.2.1",
   "matplotlib",
   "nbconvert",
   "nbformat",
@@ -14,14 +14,14 @@ requires = [
 
 [project]
 dependencies = [
-  "cmeel-boost ~= 1.89.0",
+  "cmeel-boost ~= 1.90.0",
   "example-robot-data-loaders",
-  "libcrocoddyl == 3.2.0"
+  "libcrocoddyl == 3.2.1"
 ]
 description = "A fast and flexible implementation of Rigid Body Dynamics algorithms and their analytical derivatives"
 license = "BSD-3-Clause"
 name = "crocoddyl"
-version = "3.2.0"
+version = "3.2.1"
 
 [project.urls]
 changelog = "https://github.com/loco-3d/crocoddyl/blob/devel/CHANGELOG.md"
@@ -29,7 +29,6 @@ homepage = "https://github.com/cmake-wheel/crocoddyl"
 upstream = "https://github.com/loco-3d/crocoddyl"
 
 [tool.cmeel]
-build-number = 1
 configure-args = [
   "-DBUILD_PYTHON_INTERFACE=ON",
   "-DBUILD_STANDALONE_PYTHON_INTERFACE=ON"
